@@ -49,6 +49,7 @@ function ajaxForSearch(url,filter){
 
 function loadCars() {
     var checkFilter = JSON.parse(localStorage.getItem('filter')) || false;
+    var checkAllFilters = JSON.parse(localStorage.getItem('all_filters')) || false;
     var checkFilter_type_fuel = localStorage.getItem('type_fuel') || false;
     var checkFilter_brand_name = localStorage.getItem('brand_name') || false;
     var checkFilter_type_shifter = localStorage.getItem('type_shifter') || false;
@@ -60,7 +61,10 @@ function loadCars() {
         var filter = JSON.parse(localStorage.getItem('filter'));
         ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", filter);
         highlightFilter();
-    }else{
+    }else if(checkAllFilters != false){
+        ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=all_cars");
+        loadPreviousSearches();
+    }{
         // console.log("No filters found");
         ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=all_cars");
     }
@@ -283,7 +287,17 @@ function filter_button(){
         }
 
         localStorage.setItem('filter', JSON.stringify(filter));
+        $('#highlight_searchs').empty();
+        // COMPROBAMOS SI ALL_FILTERS TIENE DATOS PARA INCREMENTARLO O CREARLO
+        if(localStorage.getItem('all_filters') !== null){
+            let filtersAlmacenados = JSON.parse(localStorage.getItem('all_filters'));
+            let new_search = filtersAlmacenados.concat([filter]);
+            localStorage.setItem('all_filters', JSON.stringify(new_search));
+        }else{
+            localStorage.setItem('all_filters', JSON.stringify([filter]));
+        }
         
+
         highlightFilter();
 
         if (filter.length != 0) {
@@ -294,18 +308,19 @@ function filter_button(){
         }
     });
 
-    $(document).on('click', '.remove_button', function(){
-        remove_filters();
-    }); 
+    remove_filters();
+    
 }
 
 function remove_filters(){
-    localStorage.removeItem('filter');
-    localStorage.removeItem('type_fuel');
-    localStorage.removeItem('brand_name');
-    localStorage.removeItem('type_shifter');
-    localStorage.removeItem('environmental_label');
-    location.reload();
+    $(document).on('click', '.remove_button', function(){
+        localStorage.removeItem('filter');
+        localStorage.removeItem('type_fuel');
+        localStorage.removeItem('brand_name');
+        localStorage.removeItem('type_shifter');
+        localStorage.removeItem('environmental_label');
+        location.reload();
+    }); 
 }
 
 function highlightFilter() {
@@ -317,26 +332,66 @@ function highlightFilter() {
         if(all_filter[i][0] == "fuel"){
             
             $("#fuel").find("option[value='"+all_filter[i][1]+"']").prop("selected", true);
-            $('<p>'+all_filter[i][1]+'</p>').attr('class', "p-2 p-highlight").appendTo('#highlight').html()
+            $('<p>'+all_filter[i][1]+'</p>').attr('class', "p-2 p-highlight").appendTo('#highlight').html();
 
         }else if(all_filter[i][0] == "brand"){
 
             $("#brand").find("option[value='"+all_filter[i][1]+"']").prop("selected", true);
-            $('<p>'+all_filter[i][1]+'</p>').attr('class', "p-2 p-highlight").appendTo('#highlight').html()
+            $('<p>'+all_filter[i][1]+'</p>').attr('class', "p-2 p-highlight").appendTo('#highlight').html();
         
         }else if(all_filter[i][0] == "environmental_label"){
 
             $("#environmental_label").find("option[value='"+all_filter[i][1]+"']").prop("selected", true);
-            $('<p>'+all_filter[i][1]+'</p>').attr('class', "p-2 p-highlight").appendTo('#highlight').html()
+            $('<p>'+all_filter[i][1]+'</p>').attr('class', "p-2 p-highlight").appendTo('#highlight').html();
             
         }else if(all_filter[i][0] == "type_shifter"){
 
             $("#type_shifter").find("option[value='"+all_filter[i][1]+"']").prop("selected", true);
-            $('<p>'+all_filter[i][1]+'</p>').attr('class', "p-2 p-highlight").appendTo('#highlight').html()
+            $('<p>'+all_filter[i][1]+'</p>').attr('class', "p-2 p-highlight").appendTo('#highlight').html();
         }
     }
     
 }
+
+// Mostrar busquedas anteriores
+function loadPreviousSearches(){
+    var checkFilters = JSON.parse(localStorage.getItem('all_filters')) || false;
+    
+    if(checkFilters != false){
+        $('<p>Busquedas anteriores</p>').attr('class', "p-2 p-highlight").appendTo('#highlight_searchs').html();
+    }
+    loadContentModal();
+}
+
+function modalSearchs(){
+        // $("#details_car").show();
+        $("#view_searchs").dialog({
+            title: "Búsquedas anteriores",
+            width : 850,
+            height: 500,
+            resizable: "false",
+            modal: "true",
+            hide: "fold",
+            show: "fold",
+        });
+}
+
+function loadContentModal() {
+    $(document).on('click', '#highlight_searchs', function(){
+        
+        var all_searchs = JSON.parse(localStorage.getItem('all_filters'))
+        // console.log(all_searchs);
+        $('#view_searchs').empty();
+        for (var i = 0; i < all_searchs.length; i++){
+            modalSearchs($('<p>'+all_searchs[i]+'</p>').attr('class', "p-2 p-highlight").attr('id', "search").appendTo('#view_searchs').html()); 
+        }
+        
+    });
+
+    $(document).on('click', '#search', function(){
+        console.log("alooo");
+    });
+ }
 
 
 
