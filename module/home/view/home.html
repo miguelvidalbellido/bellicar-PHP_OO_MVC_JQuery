@@ -1,0 +1,52 @@
+
+<div class="cards-list">
+<div id="top">  
+    <h2>MARCAS</h2>
+</div>
+</div>
+<swiper-container  id="containerBrands" >
+</swiper-container>
+
+
+<div class="cards-list" id="containerCategories">
+    <div id="top">  
+        <h2>CARROCERIAS</h2>
+    </div>
+</div>
+
+<div class="cards-list" id="containerTypeFuel">
+    <div id="top">  
+        <h2>MOTORES</h2>
+    </div>
+</div>
+
+
+<script>
+    const swiperEl = document.querySelector('swiper-container')
+    Object.assign(swiperEl, {
+      slidesPerView: 1,
+      spaceBetween: 10,
+      navigation: {
+      nextEl: ".swiper-button-next",
+      prevEl: ".swiper-button-prev",
+      },
+      pagination: {
+        clickable: true,
+      },
+      breakpoints: {
+        640: {
+          slidesPerView: 2,
+          spaceBetween: 20,
+        },
+        768: {
+          slidesPerView: 4,
+          spaceBetween: 40,
+        },
+        1024: {
+          slidesPerView: 5,
+          spaceBetween: 50,
+        },
+      },
+    });
+    swiperEl.initialize();
+  </script>
