@@ -1,3 +1,28 @@
+function loadCars() {
+    var checkFilter = JSON.parse(localStorage.getItem('filter')) || false;
+    var checkAllFilters = JSON.parse(localStorage.getItem('all_filters')) || false;
+    var checkFilter_type_fuel = localStorage.getItem('type_fuel') || false;
+    var checkFilter_brand_name = localStorage.getItem('brand_name') || false;
+    var checkFilter_type_shifter = localStorage.getItem('type_shifter') || false;
+    var checkFilter_environmental_label = localStorage.getItem('environmental_label') || false;
+
+    
+
+    if(checkFilter != false){
+        var filter = JSON.parse(localStorage.getItem('filter'));
+        ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", filter);
+        highlightFilter();
+    }else if(checkAllFilters != false){
+        ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=all_cars");
+        loadPreviousSearches();
+    }{
+        // console.log("No filters found");
+        ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=all_cars");
+    }
+
+    
+}
+
 function ajaxForSearch(url,filter){
     // console.log(url);
     // console.log(filter);
@@ -44,32 +69,6 @@ function ajaxForSearch(url,filter){
         console.log("error ajaxForSearch");
         // window.location.href = "index.php?module=ctrl_exceptions&op=503&type=503&lugar=Type_Categories HOME";
     });
-}
-
-
-function loadCars() {
-    var checkFilter = JSON.parse(localStorage.getItem('filter')) || false;
-    var checkAllFilters = JSON.parse(localStorage.getItem('all_filters')) || false;
-    var checkFilter_type_fuel = localStorage.getItem('type_fuel') || false;
-    var checkFilter_brand_name = localStorage.getItem('brand_name') || false;
-    var checkFilter_type_shifter = localStorage.getItem('type_shifter') || false;
-    var checkFilter_environmental_label = localStorage.getItem('environmental_label') || false;
-
-    
-
-    if(checkFilter != false){
-        var filter = JSON.parse(localStorage.getItem('filter'));
-        ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", filter);
-        highlightFilter();
-    }else if(checkAllFilters != false){
-        ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=all_cars");
-        loadPreviousSearches();
-    }{
-        // console.log("No filters found");
-        ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=all_cars");
-    }
-
-    
 }
 
 /**
@@ -250,15 +249,6 @@ function filter_button(){
     $('#fuel').change(function() {
         localStorage.setItem('type_fuel', this.value);
     });
-    
-    // if (localStorage.getItem('type_fuel')) {
-    //     // $('#fuel').val(localStorage.getItem('type_fuel'));
-    //     if(document.getElementById("gasolina")){ console.log("existe"); } else { console.log("no existe"); }
-    //     // $("#fuel").find("option[value='electrico']").prop("selected", true);
-    //     $('#fuel').val(localStorage.getItem('type_fuel'));
-    //     console.log(localStorage.getItem('type_fuel'));
-    // }
-
     $('#brand').change(function() {
         localStorage.setItem('brand_name', this.value);
     });
@@ -300,6 +290,7 @@ function filter_button(){
 
         highlightFilter();
 
+
         if (filter.length != 0) {
             ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", filter);
         }
@@ -311,6 +302,7 @@ function filter_button(){
     remove_filters();
     
 }
+
 
 function remove_filters(){
     $(document).on('click', '.remove_button', function(){
@@ -324,30 +316,30 @@ function remove_filters(){
 }
 
 function highlightFilter() {
-    var all_filter = JSON.parse(localStorage.getItem('filter'));
+    var filters = JSON.parse(localStorage.getItem('filter'));
     // console.log(all_filter);
     $('#highlight').empty(); // Limpiamos el contenido de highlight
 
-    for (var i = 0; i < all_filter.length; i++){
-        if(all_filter[i][0] == "fuel"){
+    for (var i = 0; i < filters.length; i++){
+        if(filters[i][0] == "fuel"){
             
-            $("#fuel").find("option[value='"+all_filter[i][1]+"']").prop("selected", true);
-            $('<p>'+all_filter[i][1]+'</p>').attr('class', "p-2 p-highlight").appendTo('#highlight').html();
+            $("#fuel").find("option[value='"+filters[i][1]+"']").prop("selected", true);
+            $('<p>'+filters[i][1]+'</p>').attr('class', "p-2 p-highlight").appendTo('#highlight').html();
 
-        }else if(all_filter[i][0] == "brand"){
+        }else if(filters[i][0] == "brand"){
 
-            $("#brand").find("option[value='"+all_filter[i][1]+"']").prop("selected", true);
-            $('<p>'+all_filter[i][1]+'</p>').attr('class', "p-2 p-highlight").appendTo('#highlight').html();
+            $("#brand").find("option[value='"+filters[i][1]+"']").prop("selected", true);
+            $('<p>'+filters[i][1]+'</p>').attr('class', "p-2 p-highlight").appendTo('#highlight').html();
         
-        }else if(all_filter[i][0] == "environmental_label"){
+        }else if(filters[i][0] == "environmental_label"){
 
-            $("#environmental_label").find("option[value='"+all_filter[i][1]+"']").prop("selected", true);
-            $('<p>'+all_filter[i][1]+'</p>').attr('class', "p-2 p-highlight").appendTo('#highlight').html();
+            $("#environmental_label").find("option[value='"+filters[i][1]+"']").prop("selected", true);
+            $('<p>'+filters[i][1]+'</p>').attr('class', "p-2 p-highlight").appendTo('#highlight').html();
             
-        }else if(all_filter[i][0] == "type_shifter"){
+        }else if(filters[i][0] == "type_shifter"){
 
-            $("#type_shifter").find("option[value='"+all_filter[i][1]+"']").prop("selected", true);
-            $('<p>'+all_filter[i][1]+'</p>').attr('class', "p-2 p-highlight").appendTo('#highlight').html();
+            $("#type_shifter").find("option[value='"+filters[i][1]+"']").prop("selected", true);
+            $('<p>'+filters[i][1]+'</p>').attr('class', "p-2 p-highlight").appendTo('#highlight').html();
         }
     }
     
@@ -366,13 +358,13 @@ function loadPreviousSearches(){
 function modalSearchs(){
         // $("#details_car").show();
         $("#view_searchs").dialog({
-            title: "Búsquedas anteriores",
+            title: "Mis búsquedas recientes",
             width : 850,
             height: 500,
             resizable: "false",
             modal: "true",
             hide: "fold",
-            show: "fold",
+            show: { effect: "blind", duration: 800 },
         });
 }
 
@@ -383,13 +375,34 @@ function loadContentModal() {
         // console.log(all_searchs);
         $('#view_searchs').empty();
         for (var i = 0; i < all_searchs.length; i++){
-            modalSearchs($('<p>'+all_searchs[i]+'</p>').attr('class', "p-2 p-highlight").attr('id', "search").appendTo('#view_searchs').html()); 
+            modalSearchs($('<p>'+all_searchs[i]+'</p>').attr('value', i).attr('class', "p-2 p-highlight text-center bg-light font-weight-bold rounded ").attr('id', "search").appendTo('#view_searchs').html()); 
         }
         
     });
 
+    // Cuando el cliente realize click recuperamos el value (posicion que queremos del array)
+    // Obtenemos el contendio y lo pasamos a ajaxforsearch y recargamos la pagina
     $(document).on('click', '#search', function(){
-        console.log("alooo");
+        // Obtenemos el valor de i en el array
+        var positionArrayFilter = this.getAttribute('value');
+        // console.log(positionArrayFilter);
+
+        // Obtenemos el array con los filtros correspondientes
+        var allFilters = JSON.parse(localStorage.getItem('all_filters'));
+        // console.log(allFilters[positionArrayFilter]); 
+
+        if (allFilters[positionArrayFilter].length != 0) {
+            ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", allFilters[positionArrayFilter]);
+            // $('#view_searchs').hide();
+            localStorage.removeItem('filter');
+            localStorage.setItem('filter', JSON.stringify(allFilters[positionArrayFilter]));
+            $('#highlight_searchs').empty();
+            $("#view_searchs").dialog("close");
+            highlightFilter();
+        }
+        
+
+
     });
  }
 
