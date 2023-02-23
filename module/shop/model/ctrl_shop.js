@@ -60,12 +60,12 @@ function getGuestToken(){
                     let str = data[row].filters;
                     let arr = str.split(':');
                     let tmp = [];
-                    
                     for(i=0;i<arr.length; i++){
-                        tmp = tmp.concat([[arr[i]]]);
+                        tmp = tmp.concat([arr[i].split(",")]);
+                        // console.log(arr[i].split(","));
                         // console.log(tmp);
                     }
-                    console.log(tmp);
+                    // console.log(tmp);
                     tmp = [tmp];
                     lastFilters = lastFilters.concat(tmp);
                 }
