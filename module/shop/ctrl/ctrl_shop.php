@@ -96,11 +96,37 @@
         break;
 
         case 'filter':
-            // echo json_encode($_POST['filter']);
-            // exit;
             $homeQuery = new DAOShop;
             $selSlide = $homeQuery -> filters($_POST['filter']);
-        
+
+            if (!empty($selSlide)) {
+                echo json_encode($selSlide);
+            }
+            else {
+                echo json_encode("error");
+            }
+        break;
+
+        case 'filters_token':
+            $filterWithToken = $_POST['filter'];
+            $saveQuery = new DAOShop;
+            $query = $saveQuery -> saveFilters($filterWithToken);
+
+            $homeQuery = new DAOShop;
+            $selSlide = $homeQuery -> filters($filterWithToken[1]);// [0] - TOKEN [1] - FILTROS
+
+            if (!empty($selSlide)) {
+                echo json_encode($selSlide);
+            }
+            else {
+                echo json_encode("error");
+            }
+        break;
+
+        case 'seeLastFilters':
+            $homeQuery = new DAOShop;
+            $selSlide = $homeQuery -> seeLastFilters($_POST['token']);
+
             if (!empty($selSlide)) {
                 echo json_encode($selSlide);
             }

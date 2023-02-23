@@ -1,31 +1,92 @@
 function loadCars() {
     var checkFilter = JSON.parse(localStorage.getItem('filter')) || false;
-    var checkAllFilters = JSON.parse(localStorage.getItem('all_filters')) || false;
+    var checkFiltersHomeBrand = JSON.parse(localStorage.getItem('homeBranFilter')) || false;
+    var checkFiltersHomeFuel = JSON.parse(localStorage.getItem('homeFuelFilter')) || false;
+    var checkFiltersHomeBodywork = JSON.parse(localStorage.getItem('homeBodyworkFilter')) || false;
+
     var checkFilter_type_fuel = localStorage.getItem('type_fuel') || false;
     var checkFilter_brand_name = localStorage.getItem('brand_name') || false;
     var checkFilter_type_shifter = localStorage.getItem('type_shifter') || false;
     var checkFilter_environmental_label = localStorage.getItem('environmental_label') || false;
 
-    
+    getGuestToken()
+        .then(function(checkLastFilters) {
 
-    if(checkFilter != false){
-        var filter = JSON.parse(localStorage.getItem('filter'));
-        ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", filter);
-        highlightFilter();
-    }else if(checkAllFilters != false){
-        ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=all_cars");
-        loadPreviousSearches();
-    }{
-        // console.log("No filters found");
-        ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=all_cars");
+            if(checkFiltersHomeBrand != false){
+                console.log(checkFiltersHomeBrand);
+                localStorage.removeItem('filterHomeBrand');
+            }else if(checkFiltersHomeFuel != false){
+                console.log(checkFiltersHomeFuel);
+                localStorage.removeItem('filterHomeFuel');
+            }else if(checkFiltersHomeBodywork != false){
+                console.log(checkFiltersHomeBodywork);
+                localStorage.removeItem('homeBodyworkFilter');
+            }else if(checkFilter != false){
+                var filter = JSON.parse(localStorage.getItem('filter'));
+                ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", filter);
+                highlightFilter();
+            }else if(checkLastFilters != false){
+                ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=all_cars");
+                loadPreviousSearches();
+            }else{
+                ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=all_cars");
+            }
+
+        })
+        .catch(function(error) {
+            console.log(error);
+        });
+}
+
+function getGuestToken(){
+    return new Promise(function(resolve,reject){
+        
+    var checkGuestToken = localStorage.getItem('guest_token') || false;
+    if(checkGuestToken == false){
+        $.getJSON("https://api.ipify.org/?format=json", function(e) {
+            // console.log(e.ip);
+            localStorage.setItem('guest_token', e.ip);
+        });
+    }else{
+        console.log("Token - [OK]");
+
+        ajaxPromise("module/shop/ctrl/ctrl_shop.php?op=seeLastFilters", 'POST', 'JSON', { 'token': localStorage.getItem('guest_token') })
+        .then(function(data) {
+            if(data != "error"){
+                var lastFilters = [];
+                checkLastFilters = true;
+
+                for(row in data){
+                    let str = data[row].filters;
+                    let arr = str.split(':');
+                    let tmp = [];
+                    
+                    for(i=0;i<arr.length; i++){
+                        tmp = tmp.concat([[arr[i]]]);
+                        // console.log(tmp);
+                    }
+                    console.log(tmp);
+                    tmp = [tmp];
+                    lastFilters = lastFilters.concat(tmp);
+                }
+
+                // console.log(lastFilters);
+
+                localStorage.removeItem('last_filters');
+                localStorage.setItem('last_filters', JSON.stringify(lastFilters));
+            }
+            resolve(checkLastFilters);
+            
+        }).catch(function() {
+            console.log("error ajaxForSearch");
+            resolve("Error");
+            // window.location.href = "index.php?module=ctrl_exceptions&op=503&type=503&lugar=Type_Categories HOME";
+        });
     }
-
-    
+    });
 }
 
 function ajaxForSearch(url,filter){
-    // console.log(url);
-    // console.log(filter);
     ajaxPromise(url, 'POST', 'JSON', { 'filter': filter })
     .then(function(data) {
         $('#list_cars1').empty(); // Limpiamos el contenido de list_cars
@@ -65,6 +126,7 @@ function ajaxForSearch(url,filter){
                 )
         }   
         }
+        mapBox_all(data);
     }).catch(function() {
         console.log("error ajaxForSearch");
         // window.location.href = "index.php?module=ctrl_exceptions&op=503&type=503&lugar=Type_Categories HOME";
@@ -114,7 +176,6 @@ function loadCars_old() {
 }
 
 function details_car(cod_car) {
-
     ajaxPromise('module/shop/ctrl/ctrl_shop.php?op=details_car&id=' + cod_car,'GET', 'JSON')
     .then(function(data) {
     $('#list_cars').empty();
@@ -157,7 +218,8 @@ function details_car(cod_car) {
                 "</div>" +
                 "</div>"
             )
-}).catch(function() {
+        mapBox(data[0]);
+    }).catch(function() {
     // window.location.href = "index.php?module=ctrl_exceptions&op=503&type=503&lugar=Load_Details SHOP";
 });
 }
@@ -258,9 +320,12 @@ function filter_button(){
     $('#environmental_label').change(function() {
         localStorage.setItem('environmental_label', this.value);
     });
+
     // Al clickar el boton almacenaremos los filtros seleccionados en un array
     // para posteriormente trabajar sobre data en el servidor
     $(document).on('click', '.filter_button', function(){
+        var filterWithToken = [];
+        var token = [];
         var filter = [];
 
         if(localStorage.getItem('type_fuel')) {
@@ -277,22 +342,29 @@ function filter_button(){
         }
 
         localStorage.setItem('filter', JSON.stringify(filter));
+
+        // Obtenemos el token y almacenamos en filterWithToken [[Token],[filtros]] --> [filtros] --> [[fuel,gasolina],[brand,bmw]]
+        token = [localStorage.getItem('guest_token')];
+        filterWithToken = token.concat([filter]);
+        console.log("Check 1");
+        console.log(filterWithToken);
+
         $('#highlight_searchs').empty();
         // COMPROBAMOS SI ALL_FILTERS TIENE DATOS PARA INCREMENTARLO O CREARLO
-        if(localStorage.getItem('all_filters') !== null){
-            let filtersAlmacenados = JSON.parse(localStorage.getItem('all_filters'));
-            let new_search = filtersAlmacenados.concat([filter]);
-            localStorage.setItem('all_filters', JSON.stringify(new_search));
-        }else{
-            localStorage.setItem('all_filters', JSON.stringify([filter]));
-        }
+        // if(localStorage.getItem('last_filters') !== null){
+        //     let filtersAlmacenados = JSON.parse(localStorage.getItem('last_filters'));
+        //     let new_search = filtersAlmacenados.concat([filter]);
+        //     localStorage.setItem('last_filters', JSON.stringify(new_search));
+        // }else{
+        //     localStorage.setItem('last_filters', JSON.stringify([filter]));
+        // }
         
 
         highlightFilter();
 
 
-        if (filter.length != 0) {
-            ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", filter);
+        if (filterWithToken.length != 0) {
+            ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filters_token", filterWithToken);
         }
         else {
             ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=all_cars");
@@ -347,12 +419,12 @@ function highlightFilter() {
 
 // Mostrar busquedas anteriores
 function loadPreviousSearches(){
-    var checkFilters = JSON.parse(localStorage.getItem('all_filters')) || false;
+    var checkFilters = JSON.parse(localStorage.getItem('last_filters')) || false;
     
     if(checkFilters != false){
         $('<p>Busquedas anteriores</p>').attr('class', "p-2 p-highlight").appendTo('#highlight_searchs').html();
     }
-    loadContentModal();
+    loadContentModalLastFilters();
 }
 
 function modalSearchs(){
@@ -368,10 +440,10 @@ function modalSearchs(){
         });
 }
 
-function loadContentModal() {
+function loadContentModalLastFilters() {
     $(document).on('click', '#highlight_searchs', function(){
         
-        var all_searchs = JSON.parse(localStorage.getItem('all_filters'))
+        var all_searchs = JSON.parse(localStorage.getItem('last_filters'))
         // console.log(all_searchs);
         $('#view_searchs').empty();
         for (var i = 0; i < all_searchs.length; i++){
@@ -385,11 +457,14 @@ function loadContentModal() {
     $(document).on('click', '#search', function(){
         // Obtenemos el valor de i en el array
         var positionArrayFilter = this.getAttribute('value');
-        // console.log(positionArrayFilter);
+        console.log(positionArrayFilter);
 
         // Obtenemos el array con los filtros correspondientes
-        var allFilters = JSON.parse(localStorage.getItem('all_filters'));
+        var allFilters = JSON.parse(localStorage.getItem('last_filters'));
         // console.log(allFilters[positionArrayFilter]); 
+        console.log(allFilters[positionArrayFilter]); 
+
+
 
         if (allFilters[positionArrayFilter].length != 0) {
             ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", allFilters[positionArrayFilter]);
@@ -404,9 +479,69 @@ function loadContentModal() {
 
 
     });
- }
+}
 
+// MAPBOX
 
+function mapBox(id) {
+    mapboxgl.accessToken = 'pk.eyJ1IjoiMjBqdWFuMTUiLCJhIjoiY2t6eWhubW90MDBnYTNlbzdhdTRtb3BkbyJ9.uR4BNyaxVosPVFt8ePxW1g';
+    const monument = [id.lon, id.lat];
+    const map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v11',
+        center: [id.lon, id.lat], // starting position [lng, lat]
+        zoom: 10 // starting zoom
+    });
+
+    // Creamosel popup
+    const popup = new mapboxgl.Popup({ offset: 25 }).setText(
+    id.brand+' | '+id.model+' | '+id.price
+    );
+     
+    // Creamos elemnto DOM para marker
+    const el = document.createElement('div');
+    el.id = 'marker';
+    el.style.backgroundImage = `url(`+id.img+`)`;
+    // console.log(id.img); 
+
+    // Creamos el marker
+    new mapboxgl.Marker(el)
+    .setLngLat(monument)
+    .setPopup(popup) // sets a popup on this marker
+    .addTo(map);
+
+}
+
+function mapBox_all(shop) {
+    mapboxgl.accessToken = 'pk.eyJ1IjoiMjBqdWFuMTUiLCJhIjoiY2t6eWhubW90MDBnYTNlbzdhdTRtb3BkbyJ9.uR4BNyaxVosPVFt8ePxW1g';
+    const map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v11',
+        center: [-0.61667, 38.83966492354664], // starting position [lng, lat]
+        zoom: 6 // starting zoom
+    });
+
+    for (row in shop) {
+        // console.log(shop[row]);s
+        const monument = [shop[row].lon, shop[row].lat];
+        const minPopup = new mapboxgl.Popup()
+        minPopup.setHTML('<h3 style="text-align:center;">' + shop[row].brand + '</h3><p style="text-align:center;">Modelo: <b>' + shop[row].model+ '</b></p>' +
+            '<p style="text-align:center;">Precio: <b>' + shop[row].price + '€</b></p>' +
+            "<button id='" + shop[row].cod_car + "' class='more_info_car btn btn-outline-info mt-3 '>Ver más</button>")
+        
+        // Creamos elemnto DOM para marker
+        const el = document.createElement('div');
+        el.id = 'marker';
+        el.style.backgroundImage = `url(`+shop[row].image+`)`;
+        // console.log(id.img); 
+
+        // Creamos el marker
+        new mapboxgl.Marker(el)
+        .setLngLat(monument)
+        .setPopup(minPopup) // sets a popup on this marker
+        .addTo(map);
+    }
+}
 
 // PRUEBAS //
 

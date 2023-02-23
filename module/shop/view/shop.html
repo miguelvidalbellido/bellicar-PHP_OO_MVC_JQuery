@@ -3,7 +3,7 @@
   
   <div class="row">
     <div class="col-sm-3 col-md-2 sidebar" id="lateral_menu">
-      <h3>Menú</h3>
+      <!-- <h3>Menú</h3> -->
       <form>
         <!-- <div class="" id="highlight">  </div> -->
         <!-- HIGHLIT -->
@@ -16,54 +16,48 @@
           </div>
         </div>
 
-        <div class=""id="view_searchs">
+        <div class=""  id="view_searchs">
 
         </div>
-        <div class="form-group" id="fuel_div">
-          <h5>Combustible: </h5>
+        <div class="form-group mt-2" id="fuel_div">
+          <h6>Combustible: </h6>
           <select class="custom-select" id="fuel">
             <option value="*">Todas</option>
           </select>
         </div>
-        <div class="form-group" id="brand_div">
-          <h5 class="font-weight-bold">Marca: </h5>
+        <div class="form-group mt-2" id="brand_div">
+          <h6 class="font-weight-bold">Marca: </h6>
           <select class="custom-select" id="brand">
             <option value="*">Todas</option>
           </select>
         </div>
-        <div class="form-group" id="shifter_div">
-          <h5>Cambio: </h5>
+        <div class="form-group mt-2" id="shifter_div">
+          <h6>Cambio: </h6>
           <select class="custom-select" id="shifter">
             <option value="*">Todos</option>
           </select>
         </div>
-        <div class="form-group" id="environmental_label_div">
-          <h5>Etiqueta medioambiental: </h5>
+        <div class="form-group mt-2 " id="environmental_label_div">
+          <h6>Etiqueta medioambiental: </h6>
           <select class="custom-select" id="environmental_label">
             <option value="*">Todas</option>
           </select>
         </div>
       </form>
     </div>
-    <div class="col-sm-9 col-md-10" id="list_cars1">
+    <div class="col-sm-9 col-md-8" id="list_cars1">
     </div>
+      <div class="col-md-2">
+        <div id="map" style='width: 20vw; height:40vw;'>
+  
+        </div>
+      </div>
   </div>
 
 </div>
 
 
 
-
-
-<!-- details-car -->
-<!-- <div class="container"> -->
-  <!-- <div id="details-shop" class="col-12"> -->
-    <!-- <div class="date_img" id="container-date-img"> </div> -->
-    <!-- <swiper-container class="col-6" id="container-date-img" navigation="true" pagination="true" keyboard="true" mousewheel="true"
-    css-mode="true" navigation="true"></swiper-container>
-    <div class="date_car col-6" id="container-date-img"> sadasdsa</div>
-  </div>
-</div> -->
 
 
 <div class="container-fluid">
@@ -71,4 +65,13 @@
     <swiper-container class="col-8" id="container-date-img" navigation="true" pagination="true" keyboard="true" mousewheel="true" css-mode="true" navigation="true" ></swiper-container>
     <div class="date_car col-4" id="container-date-img"></div>
   </div>
+  <!-- MAPA DETAILS -->
+  <div class="row mapboxCar d-flex align-items-center">
+    <div class="col-12 mx-auto">
+      <div id="map" style='width: 97vw; height: 500px;'>
+
+      </div>
+    </div>
+  </div>
 </div>
+
