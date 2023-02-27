@@ -4,23 +4,25 @@ function loadCars() {
     var checkFiltersHomeFuel = JSON.parse(localStorage.getItem('homeFuelFilter')) || false;
     var checkFiltersHomeBodywork = JSON.parse(localStorage.getItem('homeBodyworkFilter')) || false;
 
-    var checkFilter_type_fuel = localStorage.getItem('type_fuel') || false;
-    var checkFilter_brand_name = localStorage.getItem('brand_name') || false;
-    var checkFilter_type_shifter = localStorage.getItem('type_shifter') || false;
-    var checkFilter_environmental_label = localStorage.getItem('environmental_label') || false;
+    // var checkFilter_type_fuel = localStorage.getItem('type_fuel') || false;
+    // var checkFilter_brand_name = localStorage.getItem('brand_name') || false;
+    // var checkFilter_type_shifter = localStorage.getItem('type_shifter') || false;
+    // var checkFilter_environmental_label = localStorage.getItem('environmental_label') || false;
 
     getGuestToken()
         .then(function(checkLastFilters) {
 
+            console.log(checkLastFilters);
+
             if(checkFiltersHomeBrand != false){
                 console.log(checkFiltersHomeBrand);
-                localStorage.removeItem('filterHomeBrand');
+                ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", [checkFiltersHomeBrand]);
             }else if(checkFiltersHomeFuel != false){
                 console.log(checkFiltersHomeFuel);
-                localStorage.removeItem('filterHomeFuel');
+                ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", [checkFiltersHomeFuel]);
             }else if(checkFiltersHomeBodywork != false){
                 console.log(checkFiltersHomeBodywork);
-                localStorage.removeItem('homeBodyworkFilter');
+                ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", [checkFiltersHomeBodywork]);
             }else if(checkFilter != false){
                 var filter = JSON.parse(localStorage.getItem('filter'));
                 ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", filter);
@@ -79,7 +81,7 @@ function getGuestToken(){
             
         }).catch(function() {
             console.log("error ajaxForSearch");
-            resolve("Error");
+            resolve("false");
             // window.location.href = "index.php?module=ctrl_exceptions&op=503&type=503&lugar=Type_Categories HOME";
         });
     }
@@ -350,14 +352,6 @@ function filter_button(){
         console.log(filterWithToken);
 
         $('#highlight_searchs').empty();
-        // COMPROBAMOS SI ALL_FILTERS TIENE DATOS PARA INCREMENTARLO O CREARLO
-        // if(localStorage.getItem('last_filters') !== null){
-        //     let filtersAlmacenados = JSON.parse(localStorage.getItem('last_filters'));
-        //     let new_search = filtersAlmacenados.concat([filter]);
-        //     localStorage.setItem('last_filters', JSON.stringify(new_search));
-        // }else{
-        //     localStorage.setItem('last_filters', JSON.stringify([filter]));
-        // }
         
 
         highlightFilter();
@@ -383,6 +377,9 @@ function remove_filters(){
         localStorage.removeItem('brand_name');
         localStorage.removeItem('type_shifter');
         localStorage.removeItem('environmental_label');
+        localStorage.removeItem('homeBranFilter');
+        localStorage.removeItem('homeFuelFilter');
+        localStorage.removeItem('homeBodyworkFilter');
         location.reload();
     }); 
 }
@@ -542,23 +539,6 @@ function mapBox_all(shop) {
         .addTo(map);
     }
 }
-
-// PRUEBAS //
-
-// async function loadPage() {
-//     loadLateralMenu();
-//     loadCars();
-// }
-
-// async function test1() {
-
-//     let promise = new Promise((resolve, reject) => {
-//         setTimeout(() => resolve(loadLateralMenu()), 1000)
-//     });
-
-//     await promise;
-//     loadCars();    
-// }
 
 $(document).ready(function() {
     loadLateralMenu();

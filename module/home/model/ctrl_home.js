@@ -5,7 +5,7 @@ function loadBrands() {
         for (row in data) {
             $('<swiper-slide></swiper-slide>').attr({ 'id': data[row].cod_brand }).attr({ 'class': 'filterHomeBrand' }).appendTo('#containerBrands')
                 .html(
-                    "<img id="+data[row].name_cat+" src='"+ data[row].img_brand +"' >"
+                    "<img id="+data[row].cod_brand+" src='"+ data[row].img_brand +"' >"
                 )
         }
     }).catch(function() {
@@ -56,8 +56,8 @@ function loadFuel() {
 function redirectShop(){
     localStorage.removeItem('filter');
     localStorage.removeItem('homeBodyworkFilter');
-    localStorage.removeItem('filterHomeFuel');
-    localStorage.removeItem('filterHomeBrand');
+    localStorage.removeItem('homeFuelFilter');
+    localStorage.removeItem('homeBranFilter');
     // Carroceria
     $(document).on("click", ".filterHomeBodywork", function() {
         var codCat = this.getAttribute('id');
