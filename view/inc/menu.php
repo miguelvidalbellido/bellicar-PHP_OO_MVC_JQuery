@@ -65,3 +65,20 @@
 
 <!-- </div> -->
 
+<!-- IMPORTAMOS LA LIBRERIA JS DE SEARCH PARA SU FUNCIONAMIENTO -->
+
+<script src="module/search/model/ctrl_search.js"></script>
+<script src="view/js/utils.js"></script>
+<script src="https://kit.fontawesome.com/238b18d4c2.js" crossorigin="anonymous"></script>
+<!-- <link rel="stylesheet" href="https://kit.fontawesome.com/238b18d4c2.css" crossorigin="anonymous"> -->
+
+<nav class="navbar_search">
+  <i class="fa-solid fa-car-side"></i>
+  <select class="navbar-select-search" id="selectBrand"></select>
+  <select class="navbar-select-search" id="selectModel"></select>
+  <i class="fa-solid fa-map-pin"></i>
+  <div class="navbar-input-search">
+    <input type="text" placeholder="Población" id="searchAutocomplete">
+    <button id="button_search"><i class="fa-solid fa-magnifying-glass"></i></button>
+  </div>
+</nav>

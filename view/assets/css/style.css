@@ -2037,3 +2037,44 @@ section {
   .mapboxgl-popup {
   max-width: 200px;
   }
+
+  /* HORIZONTAL MENU SEARCH */
+  .navbar_search {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f0f0f0;
+    height: 60px;
+  }
+  
+  .navbar-select-search {
+    padding: 10px;
+    margin-right: 40px;
+    border: none;
+    background-color: #fff;
+    font-size: 16px;
+    outline: none;
+  }
+  
+  .navbar-input-search {
+    display: flex;
+    align-items: center;
+  }
+  
+  .navbar-input-search input[type="text"] {
+    padding: 10px;
+    margin-right: 10px;
+    border: none;
+    background-color: #fff;
+    font-size: 16px;
+    outline: none;
+  }
+  
+  .navbar-input-search button {
+    padding: 10px;
+    border: none;
+    background-color: #333;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+  }

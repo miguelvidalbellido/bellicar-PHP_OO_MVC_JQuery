@@ -12,16 +12,16 @@ function loadCars() {
     getGuestToken()
         .then(function(checkLastFilters) {
 
-            console.log(checkLastFilters);
+            // console.log(checkLastFilters);
 
             if(checkFiltersHomeBrand != false){
-                console.log(checkFiltersHomeBrand);
+                // console.log(checkFiltersHomeBrand);
                 ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", [checkFiltersHomeBrand]);
             }else if(checkFiltersHomeFuel != false){
-                console.log(checkFiltersHomeFuel);
+                // console.log(checkFiltersHomeFuel);
                 ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", [checkFiltersHomeFuel]);
             }else if(checkFiltersHomeBodywork != false){
-                console.log(checkFiltersHomeBodywork);
+                // console.log(checkFiltersHomeBodywork);
                 ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", [checkFiltersHomeBodywork]);
             }else if(checkFilter != false){
                 var filter = JSON.parse(localStorage.getItem('filter'));
@@ -50,7 +50,7 @@ function getGuestToken(){
             localStorage.setItem('guest_token', e.ip);
         });
     }else{
-        console.log("Token - [OK]");
+        // console.log("Token - [OK]");
 
         ajaxPromise("module/shop/ctrl/ctrl_shop.php?op=seeLastFilters", 'POST', 'JSON', { 'token': localStorage.getItem('guest_token') })
         .then(function(data) {
@@ -348,8 +348,8 @@ function filter_button(){
         // Obtenemos el token y almacenamos en filterWithToken [[Token],[filtros]] --> [filtros] --> [[fuel,gasolina],[brand,bmw]]
         token = [localStorage.getItem('guest_token')];
         filterWithToken = token.concat([filter]);
-        console.log("Check 1");
-        console.log(filterWithToken);
+        // console.log("Check 1");
+        // console.log(filterWithToken);
 
         $('#highlight_searchs').empty();
         
@@ -454,12 +454,12 @@ function loadContentModalLastFilters() {
     $(document).on('click', '#search', function(){
         // Obtenemos el valor de i en el array
         var positionArrayFilter = this.getAttribute('value');
-        console.log(positionArrayFilter);
+        // console.log(positionArrayFilter);
 
         // Obtenemos el array con los filtros correspondientes
         var allFilters = JSON.parse(localStorage.getItem('last_filters'));
         // console.log(allFilters[positionArrayFilter]); 
-        console.log(allFilters[positionArrayFilter]); 
+        // console.log(allFilters[positionArrayFilter]); 
 
 
 

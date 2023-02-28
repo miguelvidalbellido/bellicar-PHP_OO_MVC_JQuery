@@ -61,7 +61,7 @@ function redirectShop(){
     // Carroceria
     $(document).on("click", ".filterHomeBodywork", function() {
         var codCat = this.getAttribute('id');
-        console.log(codCat);
+        // console.log(codCat);
 
         var filterCat = [];
         filterCat.push( "cod_bodywork", this.getAttribute('id') );
@@ -75,7 +75,7 @@ function redirectShop(){
     // Tipo motor
     $(document).on("click", ".filterHomeFuel", function() {
         var codFuel = this.getAttribute('id');
-        console.log(codFuel);
+        // console.log(codFuel);
 
         var filterFuel = [];
         filterFuel.push( "cod_fuel", this.getAttribute('id'));
@@ -89,7 +89,7 @@ function redirectShop(){
     // Brands
     $(document).on("click", ".filterHomeBrand", function() {
         var codBrand = this.getAttribute('id');
-        console.log(codBrand);
+        // console.log(codBrand);s
 
         var filterBrand = [];
         filterBrand.push("cod_brand", this.getAttribute('id') );
