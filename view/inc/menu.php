@@ -78,7 +78,10 @@
   <select class="navbar-select-search" id="selectModel"></select>
   <i class="fa-solid fa-map-pin"></i>
   <div class="navbar-input-search">
-    <input type="text" placeholder="Población" id="searchAutocomplete">
-    <button id="button_search"><i class="fa-solid fa-magnifying-glass"></i></button>
+    <input type="text" placeholder="Población" id="searchAutocomplete" list="populations">
+    <datalist id="populations">
+      <!-- <option value="Paco"></option> -->
+    </datalist>
+    <button id="button_search" class="button-86" role="button"><i class="fa-solid fa-magnifying-glass"></i></button>
   </div>
 </nav>

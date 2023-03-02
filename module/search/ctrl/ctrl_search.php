@@ -41,5 +41,16 @@
         break;
 
         
+        case 'searchDataAutocomplete';
+            $queryPopulation = new DAOSearch();
+            $resQueryPopulation = $queryPopulation->searchPopulations($_POST['arraysdata']);
+
+            if(!empty($resQueryPopulation)){
+                echo json_encode($resQueryPopulation);
+            }else{
+                echo json_encode("error");
+            }
+            exit;
+        break;
     }
 ?>

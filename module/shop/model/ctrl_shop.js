@@ -3,6 +3,7 @@ function loadCars() {
     var checkFiltersHomeBrand = JSON.parse(localStorage.getItem('homeBranFilter')) || false;
     var checkFiltersHomeFuel = JSON.parse(localStorage.getItem('homeFuelFilter')) || false;
     var checkFiltersHomeBodywork = JSON.parse(localStorage.getItem('homeBodyworkFilter')) || false;
+    var checkFiltersSearch = JSON.parse(localStorage.getItem('filterSearch')) || false;
 
     // var checkFilter_type_fuel = localStorage.getItem('type_fuel') || false;
     // var checkFilter_brand_name = localStorage.getItem('brand_name') || false;
@@ -13,8 +14,12 @@ function loadCars() {
         .then(function(checkLastFilters) {
 
             // console.log(checkLastFilters);
-
-            if(checkFiltersHomeBrand != false){
+            console.log(JSON.parse(localStorage.getItem('filterSearch')));
+            if(checkFiltersSearch != false){
+                // console.log(checkFiltersSearch);
+                ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", checkFiltersSearch);
+                localStorage.removeItem('filterSearch');
+            }else if(checkFiltersHomeBrand != false){
                 // console.log(checkFiltersHomeBrand);
                 ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", [checkFiltersHomeBrand]);
             }else if(checkFiltersHomeFuel != false){
@@ -121,7 +126,7 @@ function ajaxForSearch(url,filter){
                                     "<p class='text-center mt-4'>"+data[row].year+"  |  "+data[row].km+" km </p>"+
                                     "<p class='text-center mt-4 bg-light rounded'>"+ data[row].publication_date+"</p>"+
                                     // "<p class=''> Potencia (cv): "+ data[row].power+"</p>"+
-                                "<button id='" + data[row].cod_car + "' class='more_info_car btn btn-outline-info mt-3 '>Ver más</button>"+
+                                "<button id='" + data[row].cod_car + "' class='more_info_car mt-3 button-86' role='button'>Ver más</button>"+
                                 "</div>"+
                             "</div>"+
                     "</div>"
@@ -197,14 +202,14 @@ function details_car(cod_car) {
                 "<h1 class='text-center'><b>" + data[0].brand + " " + data[0].model + "</b></h1>" +
                 "<hr class=hr-shop>" +
                 "<table id='table-shop'> <tr>" +
-                "<td> <i id='col-ico' class='fa-solid fa-road fa-2xl'></i> &nbsp;" + data[0].km + " KM" + "</td>" +
-                "<td> <i id='col-ico' class='fa-solid fa-person fa-2xl'></i> &nbsp;" + data[0].shifter + "</td>  </tr>" +
-                "<td> <i id='col-ico' class='fa-solid fa-car fa-2xl'></i> &nbsp;" + data[0].bodywork + "</td>" +
-                "<td> <i id='col-ico' class='fa-solid fa-door-open fa-2xl'></i> &nbsp;" + data[0].doors + "</td>  </tr>" +
-                "<td> <i id='col-ico' class='fa-solid fa-gas-pump fa-2xl'></i> &nbsp;" + data[0].type_motor + "</td>" +
-                "<td> <i id='col-ico' class='fa-solid fa-calendar-days fa-2xl'></i> &nbsp;" + data[0].enrollment_date + "</td>  </tr>" +
-                "<td> <i id='col-ico' class='fa-solid fa-palette fa-2xl'></i> &nbsp;" + data[0].color + "</td>" +
-                "<td> <i class='fa-solid fa-location-dot fa-2xl'></i> &nbsp;" + data[0].population + "</td> </tr>" +
+                "<td> <i id='col-ico' class='fa-solid fa-road fa-lg'></i> &nbsp;" + data[0].km + " KM" + "</td>" +
+                "<td> <i id='col-ico' class='fa-solid fa-person fa-lg'></i> &nbsp;" + data[0].shifter + "</td>  </tr>" +
+                "<td> <i id='col-ico' class='fa-solid fa-car fa-lg'></i> &nbsp;" + data[0].bodywork + "</td>" +
+                "<td> <i id='col-ico' class='fa-solid fa-door-open fa-lg'></i> &nbsp;" + data[0].doors + "</td>  </tr>" +
+                "<td> <i id='col-ico' class='fa-solid fa-gas-pump fa-lg'></i> &nbsp;" + data[0].type_motor + "</td>" +
+                "<td> <i id='col-ico' class='fa-solid fa-calendar-days fa-lg'></i> &nbsp;" + data[0].enrollment_date + "</td>  </tr>" +
+                "<td> <i id='col-ico' class='fa-solid fa-palette fa-lg'></i> &nbsp;" + data[0].color + "</td>" +
+                "<td> <i class='fa-solid fa-location-dot fa-lg'></i> &nbsp;" + data[0].population + "</td> </tr>" +
                 "<td> <h2 class='fw-bold text-uppercase csstext-red'>" + data[0].price + " €</h2></td>  </tr>" +
                 "</table>" +
                 "<hr class=hr-shop>" +
@@ -286,8 +291,8 @@ function loadLateralMenu() {
             // Button sumbit
             $('<div></div>').appendTo('#lateral_menu')
             .html(
-                "<button class='btn btn-outline-success mt-3 filter_button'>Aplicar</button>"+
-                "<button class='btn btn-outline-danger mt-3 remove_button'>Restablecer</button>"
+                "<button class='button-87 mt-3 filter_button' role='button'>Aplicar</button>"+
+                "<button class='button-88 mt-3 remove_button' role='button'>Restablecer</button>"
             )
     }
         // console.log(data);
@@ -494,7 +499,7 @@ function mapBox(id) {
     const popup = new mapboxgl.Popup({ offset: 25 }).setText(
     id.brand+' | '+id.model+' | '+id.price
     );
-     
+    
     // Creamos elemnto DOM para marker
     const el = document.createElement('div');
     el.id = 'marker';
@@ -524,7 +529,7 @@ function mapBox_all(shop) {
         const minPopup = new mapboxgl.Popup()
         minPopup.setHTML('<h3 style="text-align:center;">' + shop[row].brand + '</h3><p style="text-align:center;">Modelo: <b>' + shop[row].model+ '</b></p>' +
             '<p style="text-align:center;">Precio: <b>' + shop[row].price + '€</b></p>' +
-            "<button id='" + shop[row].cod_car + "' class='more_info_car btn btn-outline-info mt-3 '>Ver más</button>")
+            "<button id='" + shop[row].cod_car + "' class='more_info_car mt-3 button-86' role='button'>Ver más</button>")
         
         // Creamos elemnto DOM para marker
         const el = document.createElement('div');
