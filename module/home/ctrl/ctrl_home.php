@@ -58,6 +58,23 @@
             }
             exit;
         break;
+
+        case 'homeMoreVisits';
+            try{
+                $daohome3 = new DAOHome();
+                $selectMoreVisits = $daohome3->selectCarsMoreVisit();
+            } catch(Exception $e){
+                echo json_encode("error");
+            }
+            
+            if(!empty($selectMoreVisits)){
+                echo json_encode($selectMoreVisits); 
+            }
+            else{
+                echo json_encode("error");
+            }
+            exit;
+        break;
     }
 
 

@@ -27,6 +27,10 @@
             break;
         
         case 'details_car':
+            // Check if exists in table visits
+            $daoifexists = new DAOShop();
+            $existsInVisits = $daoifexists -> checkIfExistsInVisits($_GET['id']);
+
             try {
                 $daoshop = new DAOShop();
                 $Date_car = $daoshop->select_one_car($_GET['id']);

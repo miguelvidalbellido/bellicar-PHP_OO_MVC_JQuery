@@ -4,7 +4,8 @@ function loadCars() {
     var checkFiltersHomeFuel = JSON.parse(localStorage.getItem('homeFuelFilter')) || false;
     var checkFiltersHomeBodywork = JSON.parse(localStorage.getItem('homeBodyworkFilter')) || false;
     var checkFiltersSearch = JSON.parse(localStorage.getItem('filterSearch')) || false;
-
+    var checkFiltersHomeModel = JSON.parse(localStorage.getItem('homeModelFilter')) || false;
+    
     // var checkFilter_type_fuel = localStorage.getItem('type_fuel') || false;
     // var checkFilter_brand_name = localStorage.getItem('brand_name') || false;
     // var checkFilter_type_shifter = localStorage.getItem('type_shifter') || false;
@@ -12,10 +13,13 @@ function loadCars() {
 
     getGuestToken()
         .then(function(checkLastFilters) {
-
             // console.log(checkLastFilters);
-            console.log(JSON.parse(localStorage.getItem('filterSearch')));
-            if(checkFiltersSearch != false){
+            // console.log(JSON.parse(localStorage.getItem('filterSearch')));
+            if(checkFiltersHomeModel != false){
+                // console.log(checkFiltersSearch);
+                ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", [checkFiltersHomeModel]);
+                localStorage.removeItem('homeModelFilter');
+            }else if(checkFiltersSearch != false){
                 // console.log(checkFiltersSearch);
                 ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", checkFiltersSearch);
                 localStorage.removeItem('filterSearch');

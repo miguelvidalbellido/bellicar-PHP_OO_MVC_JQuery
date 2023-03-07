@@ -212,6 +212,27 @@
             return $retrArray;
         }
 
+        function checkIfExistsInVisits($cod_car){
+            $sql = "SELECT v.cod_car
+            FROM visits v
+            WHERE v.cod_car = $cod_car";
+
+            $conexion = connect::con();
+            $res = mysqli_query($conexion, $sql);
+            connect::close($conexion);
+
+            $rows = $res -> num_rows;
+
+            if ($rows === 0) {
+                $sqlInsert = "INSERT INTO visits(cod_car, num_visits) VALUES ($cod_car, 1)";
+            }else {
+                $sqlInsert = "UPDATE visits v SET v.num_visits = (v.num_visits + 1) WHERE v.cod_car = $cod_car";
+            }
+            $conexion1 = connect::con();
+            $resInsert = mysqli_query($conexion1, $sqlInsert);
+            connect::close($conexion1);
+        }
+
 }
 
         

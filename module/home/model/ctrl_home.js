@@ -53,11 +53,45 @@ function loadFuel() {
     });
 }
 
+function loadMoreVisits(){
+    ajaxPromise('module/home/ctrl/ctrl_home.php?op=homeMoreVisits','GET','JSON')
+    .then(function (data) {
+        // console.log(data);
+        for (row in data) {
+            $('<div></div>').attr('class', "card card1 filterHomeModelVisits").attr({ 'id': data[row].description }).appendTo('#containerModelVisits')
+                .html(
+                    "<div class='card_image'>"+
+                    "<img draggable='false' src=" + data[row].url_image +" />"+
+                    "</div>"+
+                    "<div class='card_title title-black'>"+
+                    "<p>" + data[row].description + "</p>"+
+                    "</div>"
+                )
+        }
+    });
+}
+
 function redirectShop(){
     localStorage.removeItem('filter');
     localStorage.removeItem('homeBodyworkFilter');
     localStorage.removeItem('homeFuelFilter');
     localStorage.removeItem('homeBranFilter');
+    localStorage.removeItem('homeModelFilter');
+
+    // Model Visits
+    $(document).on("click", ".filterHomeModelVisits", function() {
+        var model = this.getAttribute('id');
+        console.log(model);
+
+        var filterModel = [];
+        filterModel.push( "model", this.getAttribute('id') );
+        JSON.stringify(localStorage.setItem('homeModelFilter', JSON.stringify(filterModel)));
+
+        setTimeout(function() {
+            window.location.href = 'index.php?page=ctrl_shop&op=list';
+        }, 400);
+    });
+
     // Carroceria
     $(document).on("click", ".filterHomeBodywork", function() {
         var codCat = this.getAttribute('id');
@@ -88,7 +122,6 @@ function redirectShop(){
 
     // Brands
     $(document).on("click", ".filterHomeBrand", function() {
-        var codBrand = this.getAttribute('id');
         // console.log(codBrand);s
 
         var filterBrand = [];
@@ -106,4 +139,5 @@ $(document).ready(function() {
     loadFuel();
     loadBrands()
     redirectShop();
+    loadMoreVisits();
 });
