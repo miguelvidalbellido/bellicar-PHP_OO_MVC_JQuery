@@ -6,34 +6,31 @@ function loadCars() {
     var checkFiltersSearch = JSON.parse(localStorage.getItem('filterSearch')) || false;
     var checkFiltersHomeModel = JSON.parse(localStorage.getItem('homeModelFilter')) || false;
     
-    // var checkFilter_type_fuel = localStorage.getItem('type_fuel') || false;
-    // var checkFilter_brand_name = localStorage.getItem('brand_name') || false;
-    // var checkFilter_type_shifter = localStorage.getItem('type_shifter') || false;
-    // var checkFilter_environmental_label = localStorage.getItem('environmental_label') || false;
 
     getGuestToken()
         .then(function(checkLastFilters) {
             // console.log(checkLastFilters);
             // console.log(JSON.parse(localStorage.getItem('filterSearch')));
             if(checkFiltersHomeModel != false){
-                // console.log(checkFiltersSearch);
                 ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", [checkFiltersHomeModel]);
+                saveFiltersAppliedForShort(checkFiltersHomeModel);
                 localStorage.removeItem('homeModelFilter');
             }else if(checkFiltersSearch != false){
-                // console.log(checkFiltersSearch);
                 ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", checkFiltersSearch);
+                saveFiltersAppliedForShort(checkFiltersSearch);
                 localStorage.removeItem('filterSearch');
             }else if(checkFiltersHomeBrand != false){
-                // console.log(checkFiltersHomeBrand);
                 ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", [checkFiltersHomeBrand]);
+                saveFiltersAppliedForShort(checkFiltersHomeBrand);
             }else if(checkFiltersHomeFuel != false){
-                // console.log(checkFiltersHomeFuel);
                 ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", [checkFiltersHomeFuel]);
+                saveFiltersAppliedForShort(checkFiltersHomeFuel);
             }else if(checkFiltersHomeBodywork != false){
-                // console.log(checkFiltersHomeBodywork);
                 ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", [checkFiltersHomeBodywork]);
+                saveFiltersAppliedForShort(checkFiltersHomeBodywork);
             }else if(checkFilter != false){
                 var filter = JSON.parse(localStorage.getItem('filter'));
+                saveFiltersAppliedForShort(checkFilter);
                 ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", filter);
                 highlightFilter();
             }else if(checkLastFilters != false){
@@ -95,6 +92,11 @@ function getGuestToken(){
         });
     }
     });
+}
+
+function saveFiltersAppliedForShort(filtersApplied){
+    localStorage.setItem('filters_applied', JSON.stringify(filtersApplied));
+    console.log(localStorage.getItem('filters_applied'));
 }
 
 function ajaxForSearch(url,filter){
@@ -351,9 +353,9 @@ function filter_button(){
         if(localStorage.getItem('environmental_label')) {
             filter.push(['environmental_label', localStorage.getItem('environmental_label')])
         }
-
+        
         localStorage.setItem('filter', JSON.stringify(filter));
-
+        saveFiltersAppliedForShort(filter);
         // Obtenemos el token y almacenamos en filterWithToken [[Token],[filtros]] --> [filtros] --> [[fuel,gasolina],[brand,bmw]]
         token = [localStorage.getItem('guest_token')];
         filterWithToken = token.concat([filter]);
@@ -389,6 +391,7 @@ function remove_filters(){
         localStorage.removeItem('homeBranFilter');
         localStorage.removeItem('homeFuelFilter');
         localStorage.removeItem('homeBodyworkFilter');
+        localStorage.removeItem('filters_applied');
         location.reload();
     }); 
 }
@@ -549,12 +552,32 @@ function mapBox_all(shop) {
     }
 }
 
+// SHORT (ORDER BY)
+function detectChangeShort(){
+    $(document).on('change', '#order', function () {
+        let short = $(this).val();
+        console.log(short);
+
+
+        let filtrosAplicados = JSON.parse(localStorage.getItem('filters_applied')); 
+        filtrosAplicados === null ? filtrosAplicados = [["ORDER BY", short]] : filtrosAplicados.push(["ORDER BY", short]); 
+        
+        let filtrosOrder = filtrosAplicados;
+        console.log(filtrosOrder);
+
+        filtrosAplicados != 0 ? appliOrderBy(filtrosOrder) : console.log(false);
+
+        function appliOrderBy(filtros){
+            ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", filtros);
+        }
+    });
+}
+
 $(document).ready(function() {
     loadLateralMenu();
     loadCars();
     filter_button();
-    // test1();
-    // loadPage();
     clicks();
     
+    detectChangeShort();
 });
