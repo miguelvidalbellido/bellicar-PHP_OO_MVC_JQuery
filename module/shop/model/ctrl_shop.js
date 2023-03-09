@@ -457,6 +457,7 @@ function loadContentModalLastFilters() {
         $('#view_searchs').empty();
         for (var i = 0; i < all_searchs.length; i++){
             modalSearchs($('<p>'+all_searchs[i]+'</p>').attr('value', i).attr('class', "p-2 p-highlight text-center bg-light font-weight-bold rounded ").attr('id', "search").appendTo('#view_searchs').html()); 
+            saveFiltersAppliedForShort(all_searchs[i]);
         }
         
     });
@@ -563,7 +564,7 @@ function detectChangeShort(){
         filtrosAplicados === null ? filtrosAplicados = [["ORDER BY", short]] : filtrosAplicados.push(["ORDER BY", short]); 
         
         let filtrosOrder = filtrosAplicados;
-        console.log(filtrosOrder);
+        // console.log(filtrosOrder);
 
         filtrosAplicados != 0 ? appliOrderBy(filtrosOrder) : console.log(false);
 
