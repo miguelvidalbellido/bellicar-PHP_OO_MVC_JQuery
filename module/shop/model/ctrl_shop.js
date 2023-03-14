@@ -457,7 +457,7 @@ function loadContentModalLastFilters() {
         $('#view_searchs').empty();
         for (var i = 0; i < all_searchs.length; i++){
             modalSearchs($('<p>'+all_searchs[i]+'</p>').attr('value', i).attr('class', "p-2 p-highlight text-center bg-light font-weight-bold rounded ").attr('id', "search").appendTo('#view_searchs').html()); 
-            saveFiltersAppliedForShort(all_searchs[i]);
+            saveFiltersAppliedForShort(all_searchs);
         }
         
     });
