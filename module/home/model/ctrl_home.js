@@ -178,6 +178,8 @@ function getBooks(){
     }).catch(function (){
         $("<p class='warning'>No hay mas libros</p>").appendTo('#load_books_button');
         $('.more_load_books').prop('disabled', true);
+        $('.more_load_books').removeClass('button-86');
+        $('.more_load_books').addClass('button-88');
         // console.log("ajaxPromise getBooks error");
     });
     }

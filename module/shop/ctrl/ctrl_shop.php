@@ -138,6 +138,21 @@
                 echo json_encode("error");
             }
         break;
+
+        case 'loadSimilarCars':
+            $homeQuery = new DAOShop;
+            $selSlide = $homeQuery -> similarCars($_POST['id']);
+
+            if (!empty($selSlide)) {
+                echo json_encode($selSlide);
+            }
+            else {
+                echo json_encode("error");
+            }
+            // echo json_encode($_POST['id']);
+            break;
     }
+
+    
 
 ?>

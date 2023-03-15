@@ -237,6 +237,34 @@
             connect::close($conexion1);
         }
 
+
+// ============== SIMILAR CARS ================ //
+
+    function similarCars($cod_car){
+        $sql = "SELECT DISTINCT kk.*
+        FROM (SELECT c.cod_car, YEAR(c.enrollment_date) AS 'year', c.km, c.publication_date, c.enrollment_date, c.color, c.price, c.power, c.doors , i.url_image AS 'image', b.cod_brand, ty.cod_fuel, c.cod_typemotor,
+                    m.description AS 'model', b.description AS 'brand', s.description AS 'state', pr.description AS 'province', ty.description AS 'fuel', sh.description AS 'type_shifter',
+                    env.description AS 'environmental_label', loc.lat, loc.lon, bw.cod_bodywork, p.description AS 'population', vis.num_visits
+                    FROM car c, image i, model m, brand b, state s, population p, province pr, type_motor ty, shifter sh, environmental_label env, location loc, bodywork bw, visits vis
+                    WHERE c.chassis_number = i.chassis_number AND m.cod_model = c.cod_model AND b.cod_brand = m.cod_brand AND c.zip_code = p.zip_code AND p.cod_province = pr.cod_province 
+                    AND c.cod_typemotor = ty.cod_fuel AND s.cod_state = c.cod_state AND sh.cod_shifter = c.cod_shifter AND env.cod_label = c.cod_label AND c.cod_location = loc.cod_location AND c.cod_bodywork = bw.cod_bodywork AND c.cod_car = vis.cod_car AND i.url_image LIKE '%/prtd-%') as kk, car cf, model mf
+                    WHERE cf.cod_car = $cod_car AND kk.cod_brand = mf.cod_brand AND cf.cod_model = mf.cod_model OR cf.cod_typemotor = kk.cod_typemotor";
+        
+
+        $conexion = connect::con();
+        $res = mysqli_query($conexion, $sql);
+        connect::close($conexion);
+
+        $retrArray = array();
+        if ($res -> num_rows > 0) {
+            while ($row = mysqli_fetch_assoc($res)) {
+                $retrArray[] = $row;
+            }
+        }
+        return $retrArray;
+        
+    }
+
 }
 
         

@@ -235,6 +235,8 @@ function details_car(cod_car) {
     }).catch(function() {
     // window.location.href = "index.php?module=ctrl_exceptions&op=503&type=503&lugar=Load_Details SHOP";
 });
+
+loadSimiarCars(cod_car);
 }
 
 // MENU LATERAL
@@ -318,6 +320,8 @@ function clicks() {
     });
 }
 
+// =========== FILTER BUTTON ============ //
+
 function filter_button(){
 
     // Almacenamos la selección del cliente en local storage
@@ -380,6 +384,7 @@ function filter_button(){
     
 }
 
+// ============== REMOVE FILTERS =========== //
 
 function remove_filters(){
     $(document).on('click', '.remove_button', function(){
@@ -395,6 +400,8 @@ function remove_filters(){
         location.reload();
     }); 
 }
+
+// ============= HIGHLIHT FILTERS ============== //
 
 function highlightFilter() {
     var filters = JSON.parse(localStorage.getItem('filter'));
@@ -426,7 +433,7 @@ function highlightFilter() {
     
 }
 
-// Mostrar busquedas anteriores
+// ============ LAST SEARCHS ================ //
 function loadPreviousSearches(){
     var checkFilters = JSON.parse(localStorage.getItem('last_filters')) || false;
     
@@ -491,7 +498,7 @@ function loadContentModalLastFilters() {
     });
 }
 
-// MAPBOX
+// ================ MAPBOX ================== //
 
 function mapBox(id) {
     mapboxgl.accessToken = 'pk.eyJ1IjoiMjBqdWFuMTUiLCJhIjoiY2t6eWhubW90MDBnYTNlbzdhdTRtb3BkbyJ9.uR4BNyaxVosPVFt8ePxW1g';
@@ -553,7 +560,7 @@ function mapBox_all(shop) {
     }
 }
 
-// SHORT (ORDER BY)
+// =================== SHORT (ORDER BY) ======================= //
 function detectChangeShort(){
     $(document).on('change', '#order', function () {
         let short = $(this).val();
@@ -572,6 +579,46 @@ function detectChangeShort(){
             ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", filtros);
         }
     });
+}
+
+// ============= PRODUCTOS SIMILARES ============== //
+
+function loadSimiarCars(id){
+    ajaxPromise('module/shop/ctrl/ctrl_shop.php?op=loadSimilarCars', 'POST', 'JSON', { 'id': id })
+    .then(function (data) {
+        // console.log(data);
+        for(let i = 0; i < data.length; i++){
+            $('<div></div>').attr('class','col-lg-3 col-md-6 mb-3').appendTo('#similarCars')
+            .html(
+                '<div class="card">'+
+                    '<div class="bg-image hover-zoom ripple ripple-surface ripple-surface-light data-mdb-ripple-color="light"">'+
+                        '<img src="'+ data[i].image +'" class="w-100" />'+
+                        '<a href="#!">'+
+                            '<div class="mask">'+
+                                '<div class="d-flex justify-content-start align-items-end h-100">'+
+                                    '<h5><span class="badge bg-primary ms-2">'+data[i].state+'</span></h5>'+
+                                '</div>'+
+                            '</div>'+
+                            '<div class="hover-overlay">'+
+                                '<div class="mask" style="background-color: rgba(251, 251, 251, 0.15);"></div>'+
+                            '</div>'+
+                        '</a>'+
+                    '</div>'+
+                    '<div class="card-body">'+
+                        '<a href="" class="text-reset">'+
+                            '<h5 class="card-title mb-3">'+data[i].brand+' '+data[i].model+'</h5>'+
+                        '</a>'+
+                        '<a href="" class="text-reset">'+
+                            '<p>'+data[i].fuel+'</p>'+
+                        '</a>'+
+                        '<h6 class="mb-3">'+data[i].price+'</h6>'+
+                    '</div>'+
+                '</div>'
+            );
+        }
+    }).catch(function () {
+        console.log("Error load similar cars");
+    })
 }
 
 $(document).ready(function() {
