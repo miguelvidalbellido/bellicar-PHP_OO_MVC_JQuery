@@ -584,41 +584,77 @@ function detectChangeShort(){
 // ============= PRODUCTOS SIMILARES ============== //
 
 function loadSimiarCars(id){
-    ajaxPromise('module/shop/ctrl/ctrl_shop.php?op=loadSimilarCars', 'POST', 'JSON', { 'id': id })
-    .then(function (data) {
-        // console.log(data);
-        for(let i = 0; i < data.length; i++){
-            $('<div></div>').attr('class','col-lg-3 col-md-6 mb-3').appendTo('#similarCars')
-            .html(
-                '<div class="card">'+
-                    '<div class="bg-image hover-zoom ripple ripple-surface ripple-surface-light data-mdb-ripple-color="light"">'+
-                        '<img src="'+ data[i].image +'" class="w-100" />'+
-                        '<a href="#!">'+
-                            '<div class="mask">'+
-                                '<div class="d-flex justify-content-start align-items-end h-100">'+
-                                    '<h5><span class="badge bg-primary ms-2">'+data[i].state+'</span></h5>'+
+let limit = 3;
+
+    searchSimilarCars(id, limit);
+    
+    moreCarsScroll();
+
+    function searchSimilarCars(id, limit){
+
+        ajaxPromise('module/shop/ctrl/ctrl_shop.php?op=loadSimilarCars', 'POST', 'JSON', { 'id': id })
+        .then(function (data) {
+            $('#similarCars').empty();
+            // console.log(data);
+            limit_for = checkLimit(data,limit);
+            for(let i = 0; i < limit_for; i++){
+                $('<div></div>').attr('class','col-lg-4 col-md-6 mb-4').appendTo('#similarCars')
+                .html(
+                    '<div class="card">'+
+                        '<div class="bg-image hover-zoom ripple ripple-surface ripple-surface-light data-mdb-ripple-color="light"">'+
+                            '<img src="'+ data[i].image +'" class="w-100" />'+
+                            '<a href="#!">'+
+                                '<div class="mask">'+
+                                    '<div class="d-flex justify-content-start align-items-end h-100">'+
+                                        '<h5><span class="badge bg-primary ms-2">'+data[i].state+'</span></h5>'+
+                                    '</div>'+
                                 '</div>'+
-                            '</div>'+
-                            '<div class="hover-overlay">'+
-                                '<div class="mask" style="background-color: rgba(251, 251, 251, 0.15);"></div>'+
-                            '</div>'+
-                        '</a>'+
-                    '</div>'+
-                    '<div class="card-body">'+
-                        '<a href="" class="text-reset">'+
-                            '<h5 class="card-title mb-3">'+data[i].brand+' '+data[i].model+'</h5>'+
-                        '</a>'+
-                        '<a href="" class="text-reset">'+
-                            '<p>'+data[i].fuel+'</p>'+
-                        '</a>'+
-                        '<h6 class="mb-3">'+data[i].price+'</h6>'+
-                    '</div>'+
-                '</div>'
-            );
-        }
-    }).catch(function () {
-        console.log("Error load similar cars");
-    })
+                                '<div class="hover-overlay">'+
+                                    '<div class="mask" style="background-color: rgba(251, 251, 251, 0.15);"></div>'+
+                                '</div>'+
+                            '</a>'+
+                        '</div>'+
+                        '<div class="card-body">'+
+                            '<a href="" class="text-reset">'+
+                                '<h5 class="card-title mb-3">'+data[i].brand+' '+data[i].model+'</h5>'+
+                            '</a>'+
+                            '<a href="'+data[i].cod_car+'" class="more_info_car text-reset">'+
+                                '<p>'+data[i].fuel+'</p>'+
+                            '</a>'+
+                            '<h6 class="mb-3">'+data[i].price+'</h6>'+
+                        '</div>'+
+                    '</div>'
+                );
+            }
+        }).catch(function () {
+            console.log("Error load similar cars");
+        })
+    };
+
+    function checkLimit(data, limit){
+        let end_for = 0;
+        end_for = data.length > limit ? limit : data.length;
+        return end_for;
+    }
+
+    function moreCarsScroll(){
+        function amountscrolled(){
+            var winheight = $(window).height()
+            var docheight = $(document).height()
+            var scrollTop = $(window).scrollTop()
+            var trackLength = docheight - winheight
+            var pctScrolled = Math.floor(scrollTop/trackLength * 100) // gets percentage scrolled (ie: 80 NaN if tracklength == 0)
+                if (pctScrolled > 90){
+                    let limitIncrement = limit + 3;
+                    searchSimilarCars(id, limitIncrement);
+                }
+            }
+        
+            $(window).on("scroll", function(){
+            amountscrolled();
+            })
+    }
+
 }
 
 $(document).ready(function() {
