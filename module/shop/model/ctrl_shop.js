@@ -1,4 +1,4 @@
-function loadCars() {
+function loadCars(total_prod = 0, items_page=4) {
     var checkFilter = JSON.parse(localStorage.getItem('filter')) || false;
     var checkFiltersHomeBrand = JSON.parse(localStorage.getItem('homeBranFilter')) || false;
     var checkFiltersHomeFuel = JSON.parse(localStorage.getItem('homeFuelFilter')) || false;
@@ -37,7 +37,7 @@ function loadCars() {
                 ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=all_cars");
                 loadPreviousSearches();
             }else{
-                ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=all_cars");
+                ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=all_cars", filter = undefined);
             }
 
         })
@@ -99,8 +99,8 @@ function saveFiltersAppliedForShort(filtersApplied){
     console.log(localStorage.getItem('filters_applied'));
 }
 
-function ajaxForSearch(url,filter){
-    ajaxPromise(url, 'POST', 'JSON', { 'filter': filter })
+function ajaxForSearch(url,filter,total_prod = 0, items_page = 3){
+    ajaxPromise(url, 'POST', 'JSON', { 'filter': filter, 'total_prod': total_prod, 'items_page': items_page  })
     .then(function(data) {
         $('#list_cars1').empty(); // Limpiamos el contenido de list_cars
         // console.log(data);
@@ -320,7 +320,7 @@ function clicks() {
     });
 }
 
-// =========== FILTER BUTTON ============ //
+// ==================== FILTER BUTTON ==================== //
 
 function filter_button(){
 
@@ -384,7 +384,7 @@ function filter_button(){
     
 }
 
-// ============== REMOVE FILTERS =========== //
+// ==================== REMOVE FILTERS ==================== //
 
 function remove_filters(){
     $(document).on('click', '.remove_button', function(){
@@ -401,7 +401,7 @@ function remove_filters(){
     }); 
 }
 
-// ============= HIGHLIHT FILTERS ============== //
+// ==================== HIGHLIHT FILTERS ==================== //
 
 function highlightFilter() {
     var filters = JSON.parse(localStorage.getItem('filter'));
@@ -433,7 +433,7 @@ function highlightFilter() {
     
 }
 
-// ============ LAST SEARCHS ================ //
+// ==================== LAST SEARCHS ==================== //
 function loadPreviousSearches(){
     var checkFilters = JSON.parse(localStorage.getItem('last_filters')) || false;
     
@@ -498,7 +498,7 @@ function loadContentModalLastFilters() {
     });
 }
 
-// ================ MAPBOX ================== //
+// ==================== MAPBOX ==================== //
 
 function mapBox(id) {
     mapboxgl.accessToken = 'pk.eyJ1IjoiMjBqdWFuMTUiLCJhIjoiY2t6eWhubW90MDBnYTNlbzdhdTRtb3BkbyJ9.uR4BNyaxVosPVFt8ePxW1g';
@@ -560,7 +560,7 @@ function mapBox_all(shop) {
     }
 }
 
-// =================== SHORT (ORDER BY) ======================= //
+// ==================== SHORT (ORDER BY) ==================== //
 function detectChangeShort(){
     $(document).on('change', '#order', function () {
         let short = $(this).val();
@@ -581,8 +581,8 @@ function detectChangeShort(){
     });
 }
 
-// ============= PRODUCTOS SIMILARES ============== //
-
+// ==================== PRODUCTOS SIMILARES ==================== //
+// Pintamos los 3 primeros vehículos, cuando el scroll sea 95% o superior, comprobaremos si hay más coches y pintaremos los nuevos vehículos.
 function loadSimiarCars(id){
 let limit = 3;
 
@@ -591,10 +591,12 @@ let limit = 3;
     moreCarsScroll();
 
     function searchSimilarCars(id, limit){
-
+        // $('.title_similar').empty();
+        //     $('<h4>Vehículos similares</h4>').attr('class', 'mt-2 mb-5 title_similar').appendTo('.title_similarsCars');
         ajaxPromise('module/shop/ctrl/ctrl_shop.php?op=loadSimilarCars', 'POST', 'JSON', { 'id': id })
         .then(function (data) {
             $('#similarCars').empty();
+            
             // console.log(data);
             limit_for = checkLimit(data,limit);
             for(let i = 0; i < limit_for; i++){
@@ -644,7 +646,7 @@ let limit = 3;
             var scrollTop = $(window).scrollTop()
             var trackLength = docheight - winheight
             var pctScrolled = Math.floor(scrollTop/trackLength * 100) // gets percentage scrolled (ie: 80 NaN if tracklength == 0)
-                if (pctScrolled > 90){
+                if (pctScrolled > 95){
                     let limitIncrement = limit + 3;
                     searchSimilarCars(id, limitIncrement);
                 }
@@ -657,11 +659,28 @@ let limit = 3;
 
 }
 
+// ==================== PAGINATION ====================  //
+
+
+function pagination(){
+
+    $('#show_paginator').bootpag({
+        total: 23,
+        page: 3,
+        maxVisible: 10
+    }).on('page', function(event, num)
+    {
+        $("#dynamic_content").html("Page " + num); // or some ajax content loading...
+    });
+
+}
+
+
 $(document).ready(function() {
     loadLateralMenu();
     loadCars();
     filter_button();
     clicks();
-    
     detectChangeShort();
+    pagination();
 });
