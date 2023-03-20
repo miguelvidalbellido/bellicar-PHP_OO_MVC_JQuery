@@ -12,7 +12,43 @@
         case 'all_cars';
             try{
                 $daoshop = new DAOShop();
-                $SelectAllCars = $daoshop->select_cars();
+                $SelectAllCars = $daoshop->select_cars($_POST['total_prod'],$_POST['items_page']);
+            } catch(Exception $e){
+                echo json_encode("error");
+            }
+            
+            if(!empty($SelectAllCars)){
+                echo json_encode($SelectAllCars); 
+            }
+            else{
+                echo json_encode("error");
+            }
+            exit;
+            break;
+        
+            case 'count_all_cars';
+            try{
+                $daoshop = new DAOShop();
+                $SelectAllCars = $daoshop->count_select_cars();
+            } catch(Exception $e){
+                echo json_encode("error");
+            }
+            
+            if(!empty($SelectAllCars)){
+                echo json_encode($SelectAllCars); 
+            }
+            else{
+                echo json_encode("error");
+            }
+            exit;
+            break;
+
+            case 'count_cars_filter';
+            // $test = $_POST['filter'];
+            // echo json_encode($test);
+            try{
+                $daoshop = new DAOShop();
+                $SelectAllCars = $daoshop->count_filters($_POST['filter']);
             } catch(Exception $e){
                 echo json_encode("error");
             }
@@ -101,7 +137,7 @@
 
         case 'filter':
             $homeQuery = new DAOShop;
-            $selSlide = $homeQuery -> filters($_POST['filter']);
+            $selSlide = $homeQuery -> filters($_POST['filter'],$_POST['total_prod'],$_POST['items_page']);
 
             if (!empty($selSlide)) {
                 echo json_encode($selSlide);

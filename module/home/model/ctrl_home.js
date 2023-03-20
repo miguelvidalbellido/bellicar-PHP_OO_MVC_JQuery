@@ -99,7 +99,7 @@ function redirectShop(){
 
         var filterCat = [];
         filterCat.push( "cod_bodywork", this.getAttribute('id') );
-        JSON.stringify(localStorage.setItem('homeBodyworkFilter', JSON.stringify(filterCat)));
+        JSON.stringify(localStorage.setItem('homeBodyworkFilter', JSON.stringify([filterCat])));
 
         setTimeout(function() {
             window.location.href = 'index.php?page=ctrl_shop&op=list';
@@ -113,7 +113,7 @@ function redirectShop(){
 
         var filterFuel = [];
         filterFuel.push( "cod_fuel", this.getAttribute('id'));
-        JSON.stringify(localStorage.setItem('homeFuelFilter', JSON.stringify(filterFuel)));
+        JSON.stringify(localStorage.setItem('homeFuelFilter', JSON.stringify([filterFuel])));
 
         setTimeout(function() {
             window.location.href = 'index.php?page=ctrl_shop&op=list';
@@ -126,7 +126,7 @@ function redirectShop(){
 
         var filterBrand = [];
         filterBrand.push("cod_brand", this.getAttribute('id') );
-        JSON.stringify(localStorage.setItem('homeBranFilter', JSON.stringify(filterBrand)));
+        JSON.stringify(localStorage.setItem('homeBranFilter', JSON.stringify([filterBrand])));
 
         setTimeout(function() {
             window.location.href = 'index.php?page=ctrl_shop&op=list';

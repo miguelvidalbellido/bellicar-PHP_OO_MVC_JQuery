@@ -3,8 +3,27 @@
 
     class DAOShop{
 
-        function select_cars(){  
+        function select_cars($limit, $offset){  
             $sql = "SELECT c.cod_car, YEAR(c.enrollment_date) AS 'year', c.km, c.publication_date, c.color, c.price, c.power, c.doors , i.url_image AS 'image', m.description AS 'model', b.description AS 'brand', s.description AS 'state', pr.description AS 'province', ty.description AS 'fuel', loc.lat, loc.lon
+            FROM car c, image i, model m, brand b, state s, population p, province pr, type_motor ty, location loc
+            WHERE c.chassis_number = i.chassis_number AND m.cod_model = c.cod_model AND b.cod_brand = m.cod_brand AND c.zip_code = p.zip_code AND p.cod_province = pr.cod_province AND c.cod_typemotor = ty.cod_fuel AND s.cod_state = c.cod_state AND c.cod_location = loc.cod_location AND i.url_image  LIKE '%/prtd-%' 
+            LIMIT $limit, $offset;";
+
+            $conexion = connect::con();
+            $res = mysqli_query($conexion, $sql);
+            connect::close($conexion);
+
+            $retrArray = array();
+            if(mysqli_num_rows($res)>0){
+                while($row = mysqli_fetch_assoc($res)){
+                    $retrArray[] = $row;
+                }
+            }
+            return $retrArray;
+        }
+
+        function count_select_cars(){  
+            $sql = "SELECT COUNT(*) as 'cant_coches'
             FROM car c, image i, model m, brand b, state s, population p, province pr, type_motor ty, location loc
             WHERE c.chassis_number = i.chassis_number AND m.cod_model = c.cod_model AND b.cod_brand = m.cod_brand AND c.zip_code = p.zip_code AND p.cod_province = pr.cod_province AND c.cod_typemotor = ty.cod_fuel AND s.cod_state = c.cod_state AND c.cod_location = loc.cod_location AND i.url_image  LIKE '%/prtd-%' ;";
 
@@ -19,7 +38,6 @@
                 }
             }
             return $retrArray;
-            
         }
 
         function select_one_car($id){  
@@ -141,8 +159,45 @@
 
         // Filter
 
-        function filters($filter){
+        function filters($filter,$limit, $offset){
             $sql = "SELECT kk.*
+            FROM (SELECT c.cod_car, YEAR(c.enrollment_date) AS 'year', c.km, c.publication_date, c.enrollment_date, c.color, c.price, c.power, c.doors , i.url_image AS 'image', b.cod_brand, ty.cod_fuel,
+                        m.description AS 'model', b.description AS 'brand', s.description AS 'state', pr.description AS 'province', ty.description AS 'fuel', sh.description AS 'type_shifter',
+                        env.description AS 'environmental_label', loc.lat, loc.lon, bw.cod_bodywork, p.description AS 'population', vis.num_visits
+                        FROM car c, image i, model m, brand b, state s, population p, province pr, type_motor ty, shifter sh, environmental_label env, location loc, bodywork bw, visits vis
+                        WHERE c.chassis_number = i.chassis_number AND m.cod_model = c.cod_model AND b.cod_brand = m.cod_brand AND c.zip_code = p.zip_code AND p.cod_province = pr.cod_province 
+                        AND c.cod_typemotor = ty.cod_fuel AND s.cod_state = c.cod_state AND sh.cod_shifter = c.cod_shifter AND env.cod_label = c.cod_label AND c.cod_location = loc.cod_location AND c.cod_bodywork = bw.cod_bodywork AND c.cod_car = vis.cod_car AND i.url_image LIKE '%/prtd-%') as kk";
+            
+            for ($i=0; $i < count($filter); $i++){
+                if($filter[$i][0] === 'ORDER BY'){
+                    $sql.= " ORDER BY kk.". $filter[$i][1] ;
+                }else {
+                    if ($i==0){
+                        $sql.= " WHERE kk." . $filter[$i][0] . " LIKE '" . $filter[$i][1]. "'";
+                    }else{
+                        $sql.= " AND kk." . $filter[$i][0] . " LIKE '" . $filter[$i][1] . "'";
+                    }
+                }
+            }
+
+            $sql.=" LIMIT $limit, $offset;";
+
+            $conexion = connect::con();
+            $res = mysqli_query($conexion, $sql);
+            connect::close($conexion);
+
+            $retrArray = array();
+            if ($res -> num_rows > 0) {
+                while ($row = mysqli_fetch_assoc($res)) {
+                    $retrArray[] = $row;
+                }
+            }
+            return $retrArray;
+            
+        }
+
+        function count_filters($filter){
+            $sql = "SELECT COUNT(*) as 'cant_coches'
             FROM (SELECT c.cod_car, YEAR(c.enrollment_date) AS 'year', c.km, c.publication_date, c.enrollment_date, c.color, c.price, c.power, c.doors , i.url_image AS 'image', b.cod_brand, ty.cod_fuel,
                         m.description AS 'model', b.description AS 'brand', s.description AS 'state', pr.description AS 'province', ty.description AS 'fuel', sh.description AS 'type_shifter',
                         env.description AS 'environmental_label', loc.lat, loc.lon, bw.cod_bodywork, p.description AS 'population', vis.num_visits

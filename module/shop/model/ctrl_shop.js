@@ -14,31 +14,40 @@ function loadCars(total_prod = 0, items_page=4) {
             if(checkFiltersHomeModel != false){
                 ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", [checkFiltersHomeModel]);
                 saveFiltersAppliedForShort(checkFiltersHomeModel);
-                localStorage.removeItem('homeModelFilter');
+                // localStorage.removeItem('homeModelFilter');
             }else if(checkFiltersSearch != false){
                 ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", checkFiltersSearch);
                 saveFiltersAppliedForShort(checkFiltersSearch);
-                localStorage.removeItem('filterSearch');
+                // localStorage.removeItem('filterSearch');
             }else if(checkFiltersHomeBrand != false){
-                ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", [checkFiltersHomeBrand]);
+                // ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", [checkFiltersHomeBrand]);
+                ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", checkFiltersHomeBrand, total_prod, items_page);
                 saveFiltersAppliedForShort(checkFiltersHomeBrand);
+                // localStorage.removeItem('homeBranFilter');
             }else if(checkFiltersHomeFuel != false){
-                ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", [checkFiltersHomeFuel]);
+                ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", checkFiltersHomeFuel, total_prod, items_page);
                 saveFiltersAppliedForShort(checkFiltersHomeFuel);
+                // localStorage.removeItem('homeFuelFilter');
             }else if(checkFiltersHomeBodywork != false){
-                ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", [checkFiltersHomeBodywork]);
+                ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", checkFiltersHomeBodywork, total_prod, items_page);
                 saveFiltersAppliedForShort(checkFiltersHomeBodywork);
+                // localStorage.removeItem('homeBodyworkFilter');
             }else if(checkFilter != false){
                 var filter = JSON.parse(localStorage.getItem('filter'));
                 saveFiltersAppliedForShort(checkFilter);
-                ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", filter);
+                ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", filter, total_prod, items_page);
                 highlightFilter();
             }else if(checkLastFilters != false){
-                ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=all_cars");
+                ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=all_cars", undefined, total_prod, items_page);
+                console.log(items_page);
                 loadPreviousSearches();
             }else{
-                ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=all_cars", filter = undefined);
+                ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=all_cars", undefined, total_prod, items_page);
+                console.log(items_page);
+                console.log("asdsad");
             }
+            
+            pagination();
 
         })
         .catch(function(error) {
@@ -48,7 +57,7 @@ function loadCars(total_prod = 0, items_page=4) {
 
 function getGuestToken(){
     return new Promise(function(resolve,reject){
-        
+    
     var checkGuestToken = localStorage.getItem('guest_token') || false;
     if(checkGuestToken == false){
         $.getJSON("https://api.ipify.org/?format=json", function(e) {
@@ -397,6 +406,8 @@ function remove_filters(){
         localStorage.removeItem('homeFuelFilter');
         localStorage.removeItem('homeBodyworkFilter');
         localStorage.removeItem('filters_applied');
+        localStorage.removeItem('page');
+        
         location.reload();
     }); 
 }
@@ -664,23 +675,53 @@ let limit = 3;
 
 function pagination(){
 
-    $('#show_paginator').bootpag({
-        total: 23,
-        page: 3,
-        maxVisible: 10
-    }).on('page', function(event, num)
-    {
-        $("#dynamic_content").html("Page " + num); // or some ajax content loading...
-    });
+    var filters_applied = JSON.parse(localStorage.getItem('filters_applied')) || false;
+    // console.log(filters_applied);
+    url = filters_applied != false ? 'module/shop/ctrl/ctrl_shop.php?op=count_cars_filter' :  'module/shop/ctrl/ctrl_shop.php?op=count_all_cars';
+    sdata = filters_applied != false ? {'filter': filters_applied} : undefined;
 
+    
+    ajaxPromise(url, 'POST', 'JSON', sdata)
+        .then(function(data) {
+            console.log(data);
+            var total_prod = data[0].cant_coches;
+
+            console.log(data[0].cant_coches);
+
+            if (total_prod >= 4) {
+                total_pages = Math.ceil(total_prod / 4);
+            } else {
+                total_pages = 1;
+            }
+
+            $('#show_paginator').bootpag({
+                total: total_pages,
+                page: localStorage.getItem('page') ? localStorage.getItem('page') : 1,
+                maxVisible: total_pages
+            }).on('page', function(event, num)
+            {
+                localStorage.setItem('page', num);
+                // localStorage.removeItem('id_car');
+                total_prod = 4 * (num - 1);
+                if (total_prod == 0) {
+                    localStorage.setItem('total_prod', 0)
+                }
+                loadCars(total_prod, 4);
+                // $('html, body').animate({ scrollTop: $(".list__content") });
+            });
+        }).catch(function() {
+            console.log('Fail pagination');
+        });
 }
 
 
+
 $(document).ready(function() {
+    
     loadLateralMenu();
     loadCars();
     filter_button();
     clicks();
     detectChangeShort();
-    pagination();
+    // pagination();
 });
