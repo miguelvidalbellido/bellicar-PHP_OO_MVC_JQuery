@@ -12,11 +12,11 @@ function loadCars(total_prod = 0, items_page=4) {
             // console.log(checkLastFilters);
             // console.log(JSON.parse(localStorage.getItem('filterSearch')));
             if(checkFiltersHomeModel != false){
-                ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", [checkFiltersHomeModel]);
-                saveFiltersAppliedForShort(checkFiltersHomeModel);
+                ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", [checkFiltersHomeModel], total_prod, items_page);
+                saveFiltersAppliedForShort([checkFiltersHomeModel]);
                 // localStorage.removeItem('homeModelFilter');
             }else if(checkFiltersSearch != false){
-                ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", checkFiltersSearch);
+                ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", checkFiltersSearch, total_prod, items_page);
                 saveFiltersAppliedForShort(checkFiltersSearch);
                 // localStorage.removeItem('filterSearch');
             }else if(checkFiltersHomeBrand != false){
@@ -34,17 +34,15 @@ function loadCars(total_prod = 0, items_page=4) {
                 // localStorage.removeItem('homeBodyworkFilter');
             }else if(checkFilter != false){
                 var filter = JSON.parse(localStorage.getItem('filter'));
+                saveFiltersAppliedForShort(filter);
                 saveFiltersAppliedForShort(checkFilter);
                 ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", filter, total_prod, items_page);
                 highlightFilter();
             }else if(checkLastFilters != false){
                 ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=all_cars", undefined, total_prod, items_page);
-                console.log(items_page);
                 loadPreviousSearches();
             }else{
                 ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=all_cars", undefined, total_prod, items_page);
-                console.log(items_page);
-                console.log("asdsad");
             }
             
             pagination();
@@ -373,7 +371,7 @@ function filter_button(){
         token = [localStorage.getItem('guest_token')];
         filterWithToken = token.concat([filter]);
         // console.log("Check 1");
-        // console.log(filterWithToken);
+        console.log(filterWithToken);
 
         $('#highlight_searchs').empty();
         
@@ -383,6 +381,7 @@ function filter_button(){
 
         if (filterWithToken.length != 0) {
             ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filters_token", filterWithToken);
+            location.reload();
         }
         else {
             ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=all_cars");
@@ -407,6 +406,7 @@ function remove_filters(){
         localStorage.removeItem('homeBodyworkFilter');
         localStorage.removeItem('filters_applied');
         localStorage.removeItem('page');
+        localStorage.removeItem('homeModelFilter');
         
         location.reload();
     }); 
@@ -492,8 +492,6 @@ function loadContentModalLastFilters() {
         // console.log(allFilters[positionArrayFilter]); 
         // console.log(allFilters[positionArrayFilter]); 
 
-
-
         if (allFilters[positionArrayFilter].length != 0) {
             ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", allFilters[positionArrayFilter]);
             // $('#view_searchs').hide();
@@ -504,8 +502,6 @@ function loadContentModalLastFilters() {
             highlightFilter();
         }
         
-
-
     });
 }
 
@@ -683,10 +679,10 @@ function pagination(){
     
     ajaxPromise(url, 'POST', 'JSON', sdata)
         .then(function(data) {
-            console.log(data);
+            // console.log(data);
             var total_prod = data[0].cant_coches;
 
-            console.log(data[0].cant_coches);
+            // console.log(data[0].cant_coches);
 
             if (total_prod >= 4) {
                 total_pages = Math.ceil(total_prod / 4);
@@ -717,11 +713,10 @@ function pagination(){
 
 
 $(document).ready(function() {
-    
     loadLateralMenu();
     loadCars();
     filter_button();
     clicks();
     detectChangeShort();
-    // pagination();
+    // pagination(); // Se invoca dentro de la funcion loadCars
 });

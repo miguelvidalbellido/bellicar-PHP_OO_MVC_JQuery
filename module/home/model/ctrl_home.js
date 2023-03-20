@@ -135,12 +135,6 @@ function redirectShop(){
 }
 
 // =========== API CARS =========== //
-
-function getMoreBooks(){
-    
-
-}
-
 function getBooks(){
     let limit = 2;
     searchCars();

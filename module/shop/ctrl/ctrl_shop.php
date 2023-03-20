@@ -153,7 +153,7 @@
             $query = $saveQuery -> saveFilters($filterWithToken);
 
             $homeQuery = new DAOShop;
-            $selSlide = $homeQuery -> filters($filterWithToken[1]);// [0] - TOKEN [1] - FILTROS
+            $selSlide = $homeQuery -> filters($filterWithToken[1], 0, 4);// [0] - TOKEN [1] - FILTROS
 
             if (!empty($selSlide)) {
                 echo json_encode($selSlide);
