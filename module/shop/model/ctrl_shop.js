@@ -36,6 +36,7 @@ function loadCars(total_prod = 0, items_page=4) {
                 var filter = JSON.parse(localStorage.getItem('filter'));
                 saveFiltersAppliedForShort(filter);
                 saveFiltersAppliedForShort(checkFilter);
+                console.log(filter);
                 ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", filter, total_prod, items_page);
                 highlightFilter();
             }else if(checkLastFilters != false){
@@ -103,7 +104,7 @@ function getGuestToken(){
 
 function saveFiltersAppliedForShort(filtersApplied){
     localStorage.setItem('filters_applied', JSON.stringify(filtersApplied));
-    console.log(localStorage.getItem('filters_applied'));
+    // console.log(localStorage.getItem('filters_applied'));
 }
 
 function ajaxForSearch(url,filter,total_prod = 0, items_page = 3){
@@ -370,8 +371,7 @@ function filter_button(){
         // Obtenemos el token y almacenamos en filterWithToken [[Token],[filtros]] --> [filtros] --> [[fuel,gasolina],[brand,bmw]]
         token = [localStorage.getItem('guest_token')];
         filterWithToken = token.concat([filter]);
-        // console.log("Check 1");
-        console.log(filterWithToken);
+        // console.log(filterWithToken);
 
         $('#highlight_searchs').empty();
         
@@ -380,8 +380,10 @@ function filter_button(){
 
 
         if (filterWithToken.length != 0) {
+            // ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filters_token", filterWithToken);
             ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filters_token", filterWithToken);
-            location.reload();
+            saveFiltersAppliedForShort(filterWithToken[1]);
+            pagination();
         }
         else {
             ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=all_cars");
@@ -449,6 +451,7 @@ function loadPreviousSearches(){
     var checkFilters = JSON.parse(localStorage.getItem('last_filters')) || false;
     
     if(checkFilters != false){
+        $('#highlight_searchs').empty();
         $('<p>Busquedas anteriores</p>').attr('class', "p-2 p-highlight").appendTo('#highlight_searchs').html();
     }
     loadContentModalLastFilters();
@@ -485,15 +488,14 @@ function loadContentModalLastFilters() {
     $(document).on('click', '#search', function(){
         // Obtenemos el valor de i en el array
         var positionArrayFilter = this.getAttribute('value');
-        // console.log(positionArrayFilter);
 
         // Obtenemos el array con los filtros correspondientes
         var allFilters = JSON.parse(localStorage.getItem('last_filters'));
-        // console.log(allFilters[positionArrayFilter]); 
-        // console.log(allFilters[positionArrayFilter]); 
 
         if (allFilters[positionArrayFilter].length != 0) {
-            ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", allFilters[positionArrayFilter]);
+            ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", allFilters[positionArrayFilter],0,4);
+            saveFiltersAppliedForShort(allFilters[positionArrayFilter]);
+            pagination();
             // $('#view_searchs').hide();
             localStorage.removeItem('filter');
             localStorage.setItem('filter', JSON.stringify(allFilters[positionArrayFilter]));
