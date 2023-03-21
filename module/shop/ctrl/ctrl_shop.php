@@ -29,7 +29,7 @@
             case 'count_all_cars';
             try{
                 $daoshop = new DAOShop();
-                $SelectAllCars = $daoshop->count_select_cars();
+                $SelectAllCars = $daoshop->count_all_cars();
             } catch(Exception $e){
                 echo json_encode("error");
             }

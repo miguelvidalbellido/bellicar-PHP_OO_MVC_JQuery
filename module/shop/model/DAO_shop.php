@@ -22,10 +22,12 @@
             return $retrArray;
         }
 
-        function count_select_cars(){  
-            $sql = "SELECT COUNT(*) as 'cant_coches'
-            FROM car c, image i, model m, brand b, state s, population p, province pr, type_motor ty, location loc
-            WHERE c.chassis_number = i.chassis_number AND m.cod_model = c.cod_model AND b.cod_brand = m.cod_brand AND c.zip_code = p.zip_code AND p.cod_province = pr.cod_province AND c.cod_typemotor = ty.cod_fuel AND s.cod_state = c.cod_state AND c.cod_location = loc.cod_location AND i.url_image  LIKE '%/prtd-%' ;";
+        function count_all_cars(){  
+            // $sql = "SELECT COUNT(*) as 'cant_coches'
+            // FROM car c, image i, model m, brand b, state s, population p, province pr, type_motor ty, location loc
+            // WHERE c.chassis_number = i.chassis_number AND m.cod_model = c.cod_model AND b.cod_brand = m.cod_brand AND c.zip_code = p.zip_code AND p.cod_province = pr.cod_province AND c.cod_typemotor = ty.cod_fuel AND s.cod_state = c.cod_state AND c.cod_location = loc.cod_location AND i.url_image  LIKE '%/prtd-%' ;";
+
+            $sql = "CALL count_all_cars(@cant_coches); ";
 
             $conexion = connect::con();
             $res = mysqli_query($conexion, $sql);
@@ -272,23 +274,10 @@
         }
 
         function checkIfExistsInVisits($cod_car){
-            $sql = "SELECT v.cod_car
-            FROM visits v
-            WHERE v.cod_car = $cod_car";
+            $sql = "CALL increment_visits(".$cod_car.");";
 
-            $conexion = connect::con();
-            $res = mysqli_query($conexion, $sql);
-            connect::close($conexion);
-
-            $rows = $res -> num_rows;
-
-            if ($rows === 0) {
-                $sqlInsert = "INSERT INTO visits(cod_car, num_visits) VALUES ($cod_car, 1)";
-            }else {
-                $sqlInsert = "UPDATE visits v SET v.num_visits = (v.num_visits + 1) WHERE v.cod_car = $cod_car";
-            }
             $conexion1 = connect::con();
-            $resInsert = mysqli_query($conexion1, $sqlInsert);
+            $resInsert = mysqli_query($conexion1, $sql);
             connect::close($conexion1);
         }
 

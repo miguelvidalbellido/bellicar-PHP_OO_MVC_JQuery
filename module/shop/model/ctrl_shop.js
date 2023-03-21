@@ -111,7 +111,7 @@ function ajaxForSearch(url,filter,total_prod = 0, items_page = 3){
     ajaxPromise(url, 'POST', 'JSON', { 'filter': filter, 'total_prod': total_prod, 'items_page': items_page  })
     .then(function(data) {
         $('#list_cars1').empty(); // Limpiamos el contenido de list_cars
-        // console.log(data);
+        console.log(data);
         if (data == "error") {
             $('<div></div>').appendTo('#list_cars1')
                 .html(
@@ -407,6 +407,7 @@ function remove_filters(){
         localStorage.removeItem('homeFuelFilter');
         localStorage.removeItem('homeBodyworkFilter');
         localStorage.removeItem('filters_applied');
+        localStorage.removeItem('filterSearch');
         localStorage.removeItem('page');
         localStorage.removeItem('homeModelFilter');
         

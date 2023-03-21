@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 15-03-2023 a las 20:22:43
+-- Tiempo de generación: 21-03-2023 a las 20:58:22
 -- Versión del servidor: 10.4.27-MariaDB
 -- Versión de PHP: 8.1.12
 
@@ -20,6 +20,29 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `coches_net`
 --
+
+DELIMITER $$
+--
+-- Procedimientos
+--
+CREATE DEFINER=`root`@`localhost` PROCEDURE `count_all_cars` (OUT `cant_coches` INT)   BEGIN
+    	SELECT COUNT(*) as 'cant_coches'
+        FROM car c, image i, model m, brand b, state s, population p, province pr, type_motor ty, location loc
+        WHERE c.chassis_number = i.chassis_number AND m.cod_model = c.cod_model AND b.cod_brand = m.cod_brand AND c.zip_code = p.zip_code AND p.cod_province = pr.cod_province AND c.cod_typemotor = ty.cod_fuel AND s.cod_state = c.cod_state AND c.cod_location = loc.cod_location AND i.url_image  LIKE '%/prtd-%';
+    END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `increment_visits` (IN `cod_car_cli` INT)   BEGIN
+    	DECLARE existe INT;
+        SELECT @existe := COUNT(*) FROM visits WHERE cod_car = cod_car_cli ;
+        
+        IF @existe = 1 THEN
+        	UPDATE visits SET num_visits = (num_visits + 1) WHERE cod_car = cod_car_cli;
+        ELSE
+        	INSERT INTO visits VALUES(cod_car_cli, 1);
+        END IF;
+    END$$
+
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -324,7 +347,76 @@ INSERT INTO `historyfilters` (`token_guest`, `filters`, `dateSearch`) VALUES
 (' 213.0.87.134 ', 'fuel,diesel', '2023-03-09'),
 (' 213.0.87.134 ', 'fuel,gasolina', '2023-03-09'),
 (' 213.0.87.134 ', 'fuel,gasolina', '2023-03-09'),
-(' 213.0.87.134 ', 'fuel,electrico', '2023-03-09');
+(' 213.0.87.134 ', 'fuel,electrico', '2023-03-09'),
+(' 213.0.87.134 ', 'fuel,gas natural', '2023-03-16'),
+(' 213.0.87.134 ', 'fuel,diesel', '2023-03-16'),
+(' 213.0.87.134 ', 'brand,bmw', '2023-03-16'),
+(' 213.0.87.134 ', 'fuel,diesel', '2023-03-16'),
+(' 213.0.87.134 ', 'fuel,diesel', '2023-03-16'),
+(' 213.0.87.134 ', 'fuel,diesel', '2023-03-16'),
+(' 213.0.87.134 ', 'fuel,electrico:brand,bmw', '2023-03-16'),
+(' 213.0.87.134 ', 'fuel,electrico', '2023-03-16'),
+(' 213.0.87.134 ', 'fuel,gasolina', '2023-03-16'),
+(' 213.0.87.134 ', 'fuel,electrico', '2023-03-16'),
+(' 213.0.87.134 ', 'fuel,gasolina', '2023-03-16'),
+(' 213.0.87.134 ', 'fuel,gasolina', '2023-03-16'),
+(' 213.0.87.134 ', 'fuel,gasolina', '2023-03-16'),
+(' 213.0.87.134 ', 'fuel,gasolina', '2023-03-16'),
+(' 213.0.87.134 ', 'fuel,gasolina', '2023-03-16'),
+(' 213.0.87.134 ', 'fuel,gasolina', '2023-03-16'),
+(' 213.0.87.134 ', 'fuel,gasolina', '2023-03-16'),
+(' 213.0.87.134 ', 'fuel,diesel', '2023-03-16'),
+(' 213.0.87.134 ', 'fuel,diesel', '2023-03-16'),
+(' 79.143.132.181 ', 'fuel,gasolina', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,gasolina', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,gasolina', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,gasolina', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,gasolina', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,gasolina', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,gasolina', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,diesel', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,electrico', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,electrico', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,electrico', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,electrico', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,electrico', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,electrico', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,gasolina', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,electrico', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,diesel', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,diesel', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,electrico', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,diesel', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,diesel', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,diesel', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,diesel', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,diesel', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,diesel', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,electrico', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,electrico', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,diesel', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,electrico', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,gasolina', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,diesel', '2023-03-20'),
+(' 213.0.87.134 ', 'fuel,electrico', '2023-03-20'),
+(' 79.143.132.181 ', 'fuel,diesel', '2023-03-21'),
+('  ', 'fuel,diesel', '2023-03-21'),
+(' 79.143.132.181 ', 'fuel,electrico', '2023-03-21'),
+(' 79.143.132.181 ', 'fuel,gas natural', '2023-03-21'),
+(' 79.143.132.181 ', 'fuel,diesel', '2023-03-21'),
+(' 79.143.132.181 ', 'fuel,electrico', '2023-03-21'),
+(' 79.143.132.181 ', 'fuel,diesel', '2023-03-21'),
+(' 79.143.132.181 ', 'fuel,diesel', '2023-03-21'),
+(' 79.143.132.181 ', 'brand,bmw', '2023-03-21'),
+(' 79.143.132.181 ', 'fuel,diesel:brand,bmw', '2023-03-21'),
+(' 79.143.132.181 ', 'fuel,diesel:brand,bmw', '2023-03-21'),
+(' 79.143.132.181 ', 'fuel,diesel:brand,bmw', '2023-03-21'),
+(' 79.143.132.181 ', 'fuel,diesel', '2023-03-21'),
+(' 79.143.132.181 ', 'fuel,diesel', '2023-03-21'),
+(' 79.143.132.181 ', 'fuel,diesel', '2023-03-21'),
+(' 79.143.132.181 ', 'brand,volkswagen', '2023-03-21'),
+(' 213.0.87.134 ', 'fuel,electrico', '2023-03-21'),
+(' 213.0.87.134 ', 'fuel,electrico', '2023-03-21');
 
 -- --------------------------------------------------------
 
@@ -607,13 +699,20 @@ CREATE TABLE `visits` (
 --
 
 INSERT INTO `visits` (`cod_car`, `num_visits`) VALUES
-(1, 25),
-(2, 6),
+(1, 110),
+(2, 11),
 (5, 1),
 (6, 2),
 (7, 2),
 (12, 4),
-(11, 3);
+(11, 3),
+(NULL, 1),
+(3, 1),
+(4, 1),
+(8, 1),
+(9, 1),
+(10, 1),
+(13, 2);
 
 --
 -- Índices para tablas volcadas
