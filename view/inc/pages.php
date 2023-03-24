@@ -10,6 +10,9 @@
 			case "ctrl_shop";
 				include("module/shop/ctrl/".$_GET['page'].".php");
 				break;
+			case "ctrl_login";
+				include("module/login/ctrl/".$_GET['page'].".php");
+				break;
 			case "controller_cars";
 				include("module/cars/controller/".$_GET['page'].".php");
 				break;

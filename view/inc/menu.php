@@ -16,6 +16,7 @@
           <li><a class="nav-link scrollto" href="index.php?page=services">Services</a></li>
           <li><a class="nav-link   scrollto" href="index.php?page=controller_cars&op=list">Coches</a></li>
           <li><a class="nav-link scrollto" href="index.php?page=ctrl_shop&op=list">Shop</a></li>
+          <li><a class="nav-link scrollto" href="index.php?page=ctrl_login&op=loginAndRegisterView">Register</a></li>
           <li class="dropdown"><a href="#"><span>Drop Down</span> <i class="bi bi-chevron-down"></i></a>
             <ul>
               <li><a href="#">Drop Down 1</a></li>
@@ -56,7 +57,7 @@
           </div>
         </div>
         <div class="col-lg-6 order-1 order-lg-2 hero-img" data-aos="zoom-in" data-aos-delay="200">
-          <img src="view/assets/img/hero-img.png" class="img-fluid animated" alt="">
+          <img src="view/assets/img/tienda.png" class="img-fluid animated" alt="">
         </div>
       </div>
     </div>

@@ -5,6 +5,8 @@
 		include("view/inc/top_page_home.php");
 	}else if((isset($_GET['page'])) && ($_GET['page']==="ctrl_shop") ){ // Ctrl module shop
 		include("view/inc/top_page_shop.php");
+	}else if((isset($_GET['page'])) && ($_GET['page']==="ctrl_login") ){ // Ctrl module shop
+		include("view/inc/top_page_login.php");
 	}else{
 		include("view/inc/top_page.php");
 	}
