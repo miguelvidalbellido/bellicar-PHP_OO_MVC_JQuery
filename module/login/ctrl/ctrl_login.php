@@ -21,5 +21,28 @@
         echo json_encode($rdo); // Devolvemos el resultado
 
         break;
+    
+    case 'login':
+        // echo json_encode($_POST['passwordLogin']);
+        try {
+            $daoLogin = new DAOLogin();
+            $rdo = $daoLogin -> loginUser($_POST['usernameLogin'],$_POST['passwordLogin']);
+        } catch(Exception $e) {
+            echo json_encode("error");
+        }
+
+        if($rdo == "error_username"){ 
+            echo json_encode("error_username");
+            exit;
+        } else if(password_verify($_POST['passwordLogin'], $rdo)) {
+            echo json_encode("login_ok");
+            exit;
+        } else {
+            echo json_encode("error_password");
+            exit;
+        }
+
+        echo json_encode($rdo); // Devolvemos el resultado
+        break;
     }
 ?>

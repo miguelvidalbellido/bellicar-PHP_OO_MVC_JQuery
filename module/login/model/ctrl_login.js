@@ -21,6 +21,48 @@ function button_login() {
     });
 }
 
+function validate_login() {
+    var error = false;
+
+    if($('#usernameLogin').val().length === 0) {
+        $('#errorUsernameLogin').html('<br>Introduce tu nombre de usuario');
+        error = true;
+    } else {
+        if($('#usernameLogin').val().length < 6) {
+            $('#errorUsernameLogin').html('<br>El nombre de usuario tiene como mínimo 6 caracteres');
+            error = true;
+        } else {
+            $('#errorUsernameLogin').html('');
+        }
+    }
+
+    if($('#passwordLogin').val().length === 0) {
+        $('#errorPasswordLogin').html('<br>Introduce la contraseña');
+        error = true;
+    } else {
+            $('#errorPasswordLogin').html('');
+    }
+
+    return error == true ? true : false;
+}
+
+function login() {
+    validate_login() == false ? promiseLogin() : undefined;
+    function promiseLogin() {
+        let data = $('#loginForm').serialize();
+        // console.log(data);
+        ajaxPromise("module/login/ctrl/ctrl_login.php?op=login", 'POST', 'JSON', data)
+        .then(function (data) {
+            // console.log(data);
+            data == "error_username" ? $('#errorUsernameLogin').html('<br>El nombre de usuario introducido no existe') : undefined;
+            data == "error_password" ? $('#errorPasswordLogin').html('<br>Datos erroneos, revisa el nombre de usuario y la contraseña') : undefined;
+            data == "login_ok" ? setTimeout(' window.location.href = "index.php?page=ctrl_shop&op=list"; ', 1000) : undefined;
+        }).catch(function() {
+            console.log("error ajaxForSearch Login");
+        });
+    }
+}
+
 
 /***********************************
 *            REGISTER              *
@@ -117,12 +159,11 @@ function register() {
 
         ajaxPromise("module/login/ctrl/ctrl_login.php?op=register", 'POST', 'JSON', data)
         .then(function(data) {
-            // console.log(data);
             data == "error_mail" ? $('#errorMail').html('<br>El emial introduccido ya esta en uso') : undefined;
             data == "error_username" ? $('#errorUsername').html('<br>El username introduccido no esta disponible') : undefined;
             data == "ok_insert" ? (toastr.success("Registery succesfully"), setTimeout($('#selecForm').text('Register'), $('#form_register').hide(), $('#form_login').show() ,1000)) : undefined;
         }).catch(function() {
-            console.log("error ajaxForSearch");
+            console.log("error ajaxForSearch Register");
         });
     }
 }
@@ -133,6 +174,6 @@ $(document).ready(function (){
     changeForm();
     key_register();
     button_register();
-    // key_login();
-    // button_login();
+    key_login();
+    button_login();
 });
