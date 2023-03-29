@@ -1,7 +1,7 @@
 <?php
 
     include('C:\xampp\htdocs\coches_net\module\shop\model\DAO_shop.php');
-
+    @session_start();
     switch($_GET['op']){
         
         case 'list';

@@ -16,7 +16,8 @@
           <li><a class="nav-link scrollto" href="index.php?page=services">Services</a></li>
           <li><a class="nav-link   scrollto" href="index.php?page=controller_cars&op=list">Coches</a></li>
           <li><a class="nav-link scrollto" href="index.php?page=ctrl_shop&op=list">Shop</a></li>
-          <li><a class="nav-link scrollto" href="index.php?page=ctrl_login&op=loginAndRegisterView">Register</a></li>
+          <!-- <img src="view/assets/img/tienda.png" height="50vw" class="img-circle ml-2" id="avt_user"> -->
+          <li><a class="nav-link scrollto men_login" href="index.php?page=ctrl_login&op=loginAndRegisterView">Register</a></li>
           <li class="dropdown"><a href="#"><span>Drop Down</span> <i class="bi bi-chevron-down"></i></a>
             <ul>
               <li><a href="#">Drop Down 1</a></li>
@@ -36,10 +37,21 @@
           </li>
           <li><a class="nav-link scrollto" href="index.php?page=contactus">Contact</a></li>
           <li><a class="getstarted scrollto" href="#about">Get Started</a></li>
+         
+          <!-- MENU USUARIO -->
+          <div class="dropdown" id="dropdown_user">
+            
+          </div>
         </ul>
         <i class="bi bi-list mobile-nav-toggle"></i>
       </nav><!-- .navbar -->
 
+      
+      
+        
+
+      <!-- <img src="view/assets/img/tienda.png" height="50vw" class="img-circle ml-2" id="avt_user"> -->
+    <!-- </nav> -->
     </div>
   </header><!-- End Header -->
 

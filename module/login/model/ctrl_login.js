@@ -53,10 +53,12 @@ function login() {
         // console.log(data);
         ajaxPromise("module/login/ctrl/ctrl_login.php?op=login", 'POST', 'JSON', data)
         .then(function (data) {
-            // console.log(data);
-            data == "error_username" ? $('#errorUsernameLogin').html('<br>El nombre de usuario introducido no existe') : undefined;
-            data == "error_password" ? $('#errorPasswordLogin').html('<br>Datos erroneos, revisa el nombre de usuario y la contraseña') : undefined;
-            data == "login_ok" ? setTimeout(' window.location.href = "index.php?page=ctrl_shop&op=list"; ', 1000) : undefined;
+            // console.log(data['token_large']);
+            // console.log(data['token_refresh']);
+            let error = false;
+            data == "error_username" ? ( $('#errorUsernameLogin').html('<br>El nombre de usuario introducido no existe'), error = true) : undefined;
+            data == "error_password" ? ( $('#errorPasswordLogin').html('<br>Datos erroneos, revisa el nombre de usuario y la contraseña'), error = true) : undefined;
+            error == false ? ( localStorage.setItem("token", data['token_large']), localStorage.setItem("token_refresh", data['token_refresh']), toastr.success("Bienvenido de nuevo"), setTimeout(' window.location.href = "index.php?page=ctrl_shop&op=list"; ', 1000) ) : undefined;
         }).catch(function() {
             console.log("error ajaxForSearch Login");
         });
@@ -116,6 +118,7 @@ function validate_register() {
         }
     }
 
+    $('#errorRepeatPassword').html('<br>');
     if($('#passwordRegister').val().length === 0) {
         $('#errorPassword').html('<br>Tienes que escribir la contraseña');
         error = true;
@@ -124,11 +127,17 @@ function validate_register() {
             $('#errorPassword').html('<br>La password tiene que tener 8 caracteres como minimo');
             error = true;
         } else {
-            if(!passwdExpr.test($('#passwordRegister').val())) {
-                $('#errorPassword').html('<br>Debe de contener minimo 8 caracteres, mayusculas, minusculas y simbolos especiales');
-                error = true;
-            }else{
-                $('#errorPassword').html('');
+
+            if ($('#passwordRegister').val() != $('#passwordRepeatRegister').val()) { 
+                $('#errorRepeatPassword').html('<br>La password no coincide con la anterior');
+            }else { 
+                $('#errorRepeatPassword').html('<br>');
+                if(!passwdExpr.test($('#passwordRegister').val())) {
+                    $('#errorPassword').html('<br>Debe de contener minimo 8 caracteres, mayusculas, minusculas y simbolos especiales');
+                    error = true;
+                }else{
+                    $('#errorPassword').html('');
+                }
             }
         }
     }

@@ -56,5 +56,21 @@
             return $resultado;
         }
 
+        function selectDataUser($username){  
+            $sql = "SELECT users.* FROM users WHERE users.username LIKE '".$username."'";
+
+            $conexion = connect::con();
+            $res = mysqli_query($conexion, $sql);
+            connect::close($conexion);
+
+            $retrArray = array();
+            if(mysqli_num_rows($res)>0){
+                while($row = mysqli_fetch_assoc($res)){
+                    $retrArray[] = $row;
+                }
+            }
+            return $retrArray;
+        }
+
     }
 ?>
