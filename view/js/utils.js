@@ -19,7 +19,7 @@ function changeMenuAuth() {
     if(token) {
         ajaxPromise("module/login/ctrl/ctrl_login.php?op=dataUser", 'POST', 'JSON', { 'token': token })
         .then(function (data) { 
-            console.log(data);
+            // console.log(data);
             $('.men_login').remove();
             $('#dropdown_user').empty();
             // $('<img src="' + data[0]['avatar'] + '" height="50vw" class="img-circle ml-2" id="avt_user">').appendTo('#navbar_user');
@@ -51,6 +51,7 @@ function click_logout() {
         .then(function(data) {
             // console.log(data);
             localStorage.removeItem('token');
+            localStorage.removeItem('token_refresh');
             toastr.success("Logout succesfully");
             window.location.href = "index.php?page=ctrl_shop&op=list";
             // console.log('logout');
@@ -63,6 +64,12 @@ function click_logout() {
 /***********************************
 *               ACTIVITY USER              *
 ***********************************/
+
+function launchActivityData() {
+    protectUrl();
+    setInterval(function() { controlActivity() }, 10000); // 1 min = 60000
+    setInterval(function() {checkTemporalToken() }, 10000);
+}
 
 function protectUrl() {
     let token = localStorage.getItem('token');
@@ -86,9 +93,33 @@ function controlActivity() {
     });
 }
 
+// Comprueba que el token de 1 hora sigu
+function checkTemporalToken() {
+    let token_refresh = localStorage.getItem('token_refresh');
+    let token_large = localStorage.getItem('token');
+    ajaxPromise('module/login/ctrl/ctrl_login.php?op=checkExpirationTokenRefresh', 'POST', 'JSON', { 'token_refresh': token_refresh, 'token_large': token_large })
+    .then(function(data) {
+        data == "NotExpiredJWTRefresh" ? undefined : ( data == "ExpiredJWTRefresh" ? (console.log("Token refresh exp"), changeTokenRefresh()) : $('#logout').click()) ;
+        // console.log(data);
+    }).catch(function() {
+        console.log('Error promise checkTemporalToken');
+    });
+
+    function changeTokenRefresh() {
+        let token = localStorage.getItem('token');
+        ajaxPromise('module/login/ctrl/ctrl_login.php?op=changeTokenRefres', 'POST', 'JSON', { 'token': token })
+        .then(function(data) {
+            console.log(data);
+            localStorage.setItem('token_refresh', data);
+        }).catch(function() {
+            console.log('Error promise changeTokenRefresh');
+        });
+    }
+}
+
+
 $(document).ready(function() {
     changeMenuAuth();
     click_logout();
-    protectUrl();
-    setInterval(function() { controlActivity() }, 60000); // 1 min = 60000
+    launchActivityData();
 })

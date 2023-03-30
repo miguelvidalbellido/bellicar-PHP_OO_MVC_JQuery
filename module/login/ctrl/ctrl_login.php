@@ -104,6 +104,38 @@
         }
         break;
 
+    case 'checkExpirationTokenRefresh':
+        $tokenRefreshDec = decode_token($_POST['token_refresh']);
+        $tokenLargeDec = decode_token($_POST['token_large']);
+
+        
+        // Comprobamos si Token Refresh ha caducado
+        if ($tokenRefreshDec['exp'] < time()) {
+            if ($tokenLargeDec['exp'] > time()) {
+                // Devolvemos que hay que generar token nuevo
+                echo json_encode("ExpiredJWTRefresh");
+            } else {
+                // Devolvemos que han caducado los dos y hay que hacer logout
+                echo json_encode("ExpiredJWTToken");
+            }
+        } else {
+            echo json_encode("NotExpiredJWTRefresh");
+        }
+        break;
+    
+    case 'changeTokenRefres':
+        // Comprobamos que el usuario del token es el mismo que el de la session
+        $parseToken = decode_token($_POST['token']);
+        if(isset($_SESSION['username']) && ($_SESSION['username']) == $parseToken['username']){
+            $token = create_token_refresh($_SESSION['username']);
+            echo json_encode($token);
+            exit;
+        } else {
+            echo json_encode("wrongUser");
+            exit;
+        }
+
+        break;
     }
 
     
