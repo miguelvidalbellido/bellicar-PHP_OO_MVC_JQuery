@@ -67,8 +67,8 @@ function click_logout() {
 
 function launchActivityData() {
     protectUrl();
-    setInterval(function() { controlActivity() }, 10000); // 1 min = 60000
-    setInterval(function() {checkTemporalToken() }, 10000);
+    setInterval(function() { controlActivity() }, 600000); // 1 min = 60000
+    setInterval(function() {checkTemporalToken() }, 600000);
 }
 
 function protectUrl() {
@@ -93,7 +93,7 @@ function controlActivity() {
     });
 }
 
-// Comprueba que el token de 1 hora sigu
+// Comprueba que el token de 1 hora sigue activo
 function checkTemporalToken() {
     let token_refresh = localStorage.getItem('token_refresh');
     let token_large = localStorage.getItem('token');

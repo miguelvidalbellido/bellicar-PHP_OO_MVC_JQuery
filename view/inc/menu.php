@@ -16,6 +16,7 @@
           <li><a class="nav-link scrollto" href="index.php?page=services">Services</a></li>
           <li><a class="nav-link   scrollto" href="index.php?page=controller_cars&op=list">Coches</a></li>
           <li><a class="nav-link scrollto" href="index.php?page=ctrl_shop&op=list">Shop</a></li>
+          <li><a class="nav-link scrollto" href="index.php?page=ctrl_dashboard&op=launchView">Admin</a></li>
           <!-- <img src="view/assets/img/tienda.png" height="50vw" class="img-circle ml-2" id="avt_user"> -->
           <li><a class="nav-link scrollto men_login" href="index.php?page=ctrl_login&op=loginAndRegisterView">Register</a></li>
           <li class="dropdown"><a href="#"><span>Drop Down</span> <i class="bi bi-chevron-down"></i></a>

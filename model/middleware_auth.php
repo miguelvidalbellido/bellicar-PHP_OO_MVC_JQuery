@@ -15,7 +15,7 @@
         $jwt = parse_ini_file('C:\xampp\htdocs\coches_net\model\data.ini', true);
         $header = $jwt['jwt_credentials']['header'];
         $secret = $jwt['jwt_credentials']['secret'];
-        $payload = '{"iat":"' . time() . '","exp":"' . time() + (14000) . '","username":"' . $username . '"}';
+        $payload = '{"iat":"' . time() . '","exp":"' . time() + (14400) . '","username":"' . $username . '"}';
     
         $JWT = new JWT;
         $token = $JWT->encode($header, $payload, $secret);

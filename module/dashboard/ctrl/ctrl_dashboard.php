@@ -1,0 +1,133 @@
+<?php
+
+include('C:\xampp\htdocs\coches_net\module\dashboard\model\DAO_dashboard.php');
+    @session_start();
+
+    switch ($_GET['op']) {
+
+    case 'launchView':
+        include("module/dashboard/view/dashboard.html");
+        break;
+    
+    // CRUD USERS
+
+    case 'dataUsers':
+        try{
+            $daoDashboard = new DAODashboard();
+            $SelectUsers = $daoDashboard->readUsers();
+        } catch(Exception $e){
+            echo json_encode("error");
+        }
+        
+        if(!empty($SelectUsers)){
+            echo json_encode($SelectUsers); 
+        }
+        else{
+            echo json_encode("error");
+        }
+        exit;
+
+    case 'deleteUser':
+        try{
+            $daoDashboard = new DAODashboard();
+            $DeleteUser = $daoDashboard->deleteUser($_POST['username']);
+        }catch(Exception $e){
+            echo json_encode("error");
+        }
+        
+        if(!empty($DeleteUser)){
+            echo json_encode($DeleteUser); 
+        }
+        else{
+            echo json_encode("error");
+        }
+
+        break;
+    
+    case 'dataOneUser':
+        try{
+            $daoDashboard = new DAODashboard();
+            $SelectUsers = $daoDashboard->readOneUser($_POST['username']);
+        } catch(Exception $e){
+            echo json_encode("error");
+        }
+            
+        if(!empty($SelectUsers)){
+            echo json_encode($SelectUsers); 
+        }
+        else{
+            echo json_encode("error");
+        }
+        exit;
+
+    case 'updateUser':
+        try{
+            $daoDashboard = new DAODashboard();
+            $existeUser = $daoDashboard->checkUsernameUpdate($_POST['usernameRegister'], $_POST['usernameRegisterDb']);
+        } catch(Exception $e){
+            echo json_encode("error");
+        }
+
+        if($existeUser->existe == 1){
+            echo json_encode("Username_no_valido");
+            exit;
+        }
+
+        // Si no existe el usuario comprueba el correo
+        try{
+            $daoDashboard1 = new DAODashboard();
+            $existeMail = $daoDashboard1->checkEmailUpdate($_POST['emailRegister'], $_POST['emailRegisterDb']);
+        } catch(Exception $e){
+            echo json_encode("error");
+        }
+
+        if($existeMail->existe_mail == 1){
+            echo json_encode("Email_no_valido");
+            exit;
+        }
+
+        // Comprobamos si la passwd ha sido modificada
+
+        if($_POST['passwordRegisterDb'] == $_POST['passwordRegister']){
+            $password = $_POST['passwordRegisterDb'];
+        }else {
+            $password = password_hash($_POST['passwordRegister'], PASSWORD_DEFAULT, ['cost' => 12]);
+        }
+
+        try{
+            $daoDashboard1 = new DAODashboard();
+            $existeMail = $daoDashboard1->updateUser($_POST['usernameRegisterDb'], $_POST['usernameRegister'], $_POST['emailRegister'], $password, $_POST['f_nacimientoRegister']);
+        } catch(Exception $e){
+            echo json_encode("error");
+        }
+
+       echo json_encode($existeMail);
+
+
+        // if(!empty($existeUser)){
+        //     echo json_encode($existeUser); 
+        // }
+        // else{
+        //     echo json_encode("error");
+        // }
+
+        break;
+    // ESTADISTICAS USERS
+
+    case 'cantUsers':
+        try{
+            $daoDashboard = new DAODashboard();
+            $countUsers = $daoDashboard->cantUsers();
+        } catch(Exception $e){
+            echo json_encode("error");
+        }
+        
+        if(!empty($countUsers)){
+            echo json_encode($countUsers); 
+        }
+        else{
+            echo json_encode("error");
+        }
+        exit;
+    }
+?>

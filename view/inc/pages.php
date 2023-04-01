@@ -4,6 +4,9 @@
 			case "homepage";
 				include("module/inicio/inicio.html");
 				break;
+			case "ctrl_dashboard";
+				include("module/dashboard/ctrl/".$_GET['page'].".php");
+				break;
 			case "ctrl_home";
 				include("module/home/ctrl/".$_GET['page'].".php");
 				break;

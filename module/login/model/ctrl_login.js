@@ -130,6 +130,7 @@ function validate_register() {
 
             if ($('#passwordRegister').val() != $('#passwordRepeatRegister').val()) { 
                 $('#errorRepeatPassword').html('<br>La password no coincide con la anterior');
+                // error = true;
             }else { 
                 $('#errorRepeatPassword').html('<br>');
                 if(!passwdExpr.test($('#passwordRegister').val())) {
