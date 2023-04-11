@@ -3,8 +3,12 @@
 
 /* Bootstrap Icons */
 @import url("https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.4.0/font/bootstrap-icons.min.css");
+
 </style>
 
+<!-- /* Chart js */ -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.2.1/chart.cjs"></script> -->
 
 
 <!-- Dashboard -->
@@ -52,7 +56,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">
+                        <a class="nav-link"  id="stats">
                             <i class="bi bi-bar-chart"></i> Analitycs
                         </a>
                     </li>
@@ -64,11 +68,11 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">
-                            <i class="bi bi-bookmarks"></i> Collections
+                            <i class="bi bi-funnel"></i> Search
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">
+                        <a class="nav-link" id="users">
                             <i class="bi bi-people"></i> Users
                         </a>
                     </li>
@@ -178,19 +182,19 @@
                         </div>
                         <!-- Actions -->
                         <div class="col-sm-6 col-12 text-sm-end">
-                            <div class="mx-n1">
+                            <div class="mx-n1" id="buttons_up">
                                 <a href="#" class="btn d-inline-flex btn-sm btn-neutral border-base mx-1">
                                     <span class=" pe-2">
                                         <i class="bi bi-pencil"></i>
                                     </span>
                                     <span>Edit</span>
                                 </a>
-                                <a href="#" class="btn d-inline-flex btn-sm btn-primary mx-1">
+                                <!-- <a  class="btn d-inline-flex btn-sm btn-primary mx-1">
                                     <span class=" pe-2">
                                         <i class="bi bi-plus"></i>
                                     </span>
                                     <span>Create</span>
-                                </a>
+                                </a> -->
                             </div>
                         </div>
                     </div>
@@ -283,7 +287,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-xl-3 col-sm-6 col-12">
+                    <!-- <div class="col-xl-3 col-sm-6 col-12">
                         <div class="card shadow border-0">
                             <div class="card-body">
                                 <div class="row">
@@ -305,24 +309,24 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
                 <!-- TABLA DE DATOS DONDE IRA EL CRUD -->
-                <div class="card shadow border-0 mb-7">
+                <div class="card shadow border-0 mb-7" id="tableData">
                     <div class="card-header">
                         <h5 class="mb-0">Users</h5>
                     </div>
                     <div class="table-responsive">
                         <table class="table table-hover table-nowrap">
-                            <thead class="thead-light">
-                                <tr>
+                            <thead class="thead-light" id="cabeceraDataList">
+                                <!-- <tr>
                                     <th scope="col">Username</th>
                                     <th scope="col">Fecha de alta</th>
                                     <th scope="col">Fecha de nacimiento</th>
                                     <th scope="col">Rol</th>
                                     <th scope="col">Email</th>
                                     <th>Administrar</th>
-                                </tr>
+                                </tr> -->
                             </thead>
                             <tbody id="usersLauncher">
                                 <!-- <tr>
@@ -359,6 +363,7 @@
                             </tbody>
                         </table>
                     </div>
+                    
                     <!-- <div class="card-footer border-0 py-5">
                         <span class="text-muted text-sm">Showing 10 items out of 250 results found</span>
                     </div> -->
@@ -372,4 +377,4 @@
   
   <!-- Modal -->
   <div id="launchModals"></div>
-  
+  <!-- <canvas id="doughnut-chart" width="800" height="450"></canvas> -->

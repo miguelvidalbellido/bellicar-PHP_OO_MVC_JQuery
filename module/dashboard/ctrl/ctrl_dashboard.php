@@ -112,6 +112,19 @@ include('C:\xampp\htdocs\coches_net\module\dashboard\model\DAO_dashboard.php');
         // }
 
         break;
+    case 'createUser':
+            // echo json_encode($_POST['f_nacimientoRegister']);
+            // exit;
+            try{
+                $daoRegister = new DAODashboard();
+                $rdo = $daoRegister -> createUser($_POST['usernameRegister'],$_POST['emailRegister'],$_POST['passwordRegister'],$_POST['f_nacimientoRegister']);
+            } catch (Exception $e){
+                echo json_encode("error");
+            }
+    
+            echo json_encode($rdo); // Devolvemos el resultado
+    
+            break;
     // ESTADISTICAS USERS
 
     case 'cantUsers':
@@ -129,5 +142,74 @@ include('C:\xampp\htdocs\coches_net\module\dashboard\model\DAO_dashboard.php');
             echo json_encode("error");
         }
         exit;
+    
+    case 'cantBusquedasDiarias':
+        try{
+            $daoDashboard = new DAODashboard();
+            $countSearchs = $daoDashboard->cantSearchs();
+        } catch(Exception $e){
+            echo json_encode("error");
+        }
+        
+        if(!empty($countSearchs)){
+            echo json_encode($countSearchs); 
+        }
+        else{
+            echo json_encode("error");
+        }
+        break;
+    // STATS GENERALES
+
+    case 'chartBrandMostVisited':
+        try{
+            $daoDashboard = new DAODashboard();
+            $brandVisits = $daoDashboard->brandMoreVisited();
+        } catch(Exception $e){
+            echo json_encode("error");
+        }
+
+        if(!empty($brandVisits)){
+            echo json_encode($brandVisits); 
+        }
+        else{
+            echo json_encode("error");
+        }
+        break;
+
+    case 'chartUserRegistration':
+        try{
+            $daoDashboard = new DAODashboard();
+            $userRegistration = $daoDashboard->userDateRegister();
+        } catch(Exception $e){
+            echo json_encode("error");
+        }
+    
+        if(!empty($userRegistration)){
+            echo json_encode($userRegistration); 
+        }
+        else{
+            echo json_encode("error");
+        }
+        break;
+    case 'chartBodyworkMostVisited':
+        try{
+            $daoDashboard = new DAODashboard();
+            $bodyworkVisits = $daoDashboard->bodyworkMoreVisited();
+        } catch(Exception $e){
+            echo json_encode("error");
+        }
+    
+        if(!empty($bodyworkVisits)){
+            echo json_encode($bodyworkVisits); 
+        }
+        else{
+            echo json_encode("error");
+        }
+        break;
     }
+
+
+    
+
+    
 ?>

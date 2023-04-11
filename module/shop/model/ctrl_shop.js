@@ -47,7 +47,7 @@ function loadCars(total_prod = 0, items_page=4) {
             }
             
             pagination();
-
+            
         })
         .catch(function(error) {
             console.log(error);
@@ -56,17 +56,24 @@ function loadCars(total_prod = 0, items_page=4) {
 
 function getGuestToken(){
     return new Promise(function(resolve,reject){
-    
-    var checkGuestToken = localStorage.getItem('guest_token') || false;
-    if(checkGuestToken == false){
-        $.getJSON("https://api.ipify.org/?format=json", function(e) {
-            // console.log(e.ip);
-            localStorage.setItem('guest_token', e.ip);
-        });
+    localStorage.removeItem('last_filters');
+    var token = localStorage.getItem('token') || false;
+    if(token == false){
+        // $.getJSON("https://api.ipify.org/?format=json", function(e) {
+        //     // console.log(e.ip);
+        //     localStorage.setItem('guest_token', e.ip);
+        // });
+        
+        resolve("false");
+        console.log("El usuario no esta registrado");
     }else{
         // console.log("Token - [OK]");
-
-        ajaxPromise("module/shop/ctrl/ctrl_shop.php?op=seeLastFilters", 'POST', 'JSON', { 'token': localStorage.getItem('guest_token') })
+        
+        if(token) {
+            ajaxPromise("module/login/ctrl/ctrl_login.php?op=dataUser", 'POST', 'JSON', { 'token': token })
+            .then(function (data) { 
+                let username = data[0]['username'];
+                ajaxPromise("module/shop/ctrl/ctrl_shop.php?op=seeLastFilters", 'POST', 'JSON', { 'token': username })
         .then(function(data) {
             if(data != "error"){
                 var lastFilters = [];
@@ -98,6 +105,14 @@ function getGuestToken(){
             resolve("false");
             // window.location.href = "index.php?module=ctrl_exceptions&op=503&type=503&lugar=Type_Categories HOME";
         });
+            }).catch(function() {
+                console.log("Error al cargar data del usuario");
+            });
+        }else{
+            resolve("false");
+        }
+
+        
     }
     });
 }
@@ -141,6 +156,7 @@ function ajaxForSearch(url,filter,total_prod = 0, items_page = 3){
                                     "<p class='text-center mt-4 bg-light rounded'>"+ data[row].publication_date+"</p>"+
                                     // "<p class=''> Potencia (cv): "+ data[row].power+"</p>"+
                                 "<button id='" + data[row].cod_car + "' class='more_info_car mt-3 button-86' role='button'>Ver más</button>"+
+                                "<a id='like_button' value='"+data[row].cod_car+"'><i class='bi bi-star text-primary' ></i><a>"+
                                 "</div>"+
                             "</div>"+
                     "</div>"
@@ -326,6 +342,11 @@ function clicks() {
         var cod_car = this.getAttribute('id');
         details_car(cod_car);
     });
+
+    $(document).on("click", "#like_button", function() {
+        let value = this.getAttribute('value');
+        likes(value);
+    });
 }
 
 // ==================== FILTER BUTTON ==================== //
@@ -369,25 +390,54 @@ function filter_button(){
         localStorage.setItem('filter', JSON.stringify(filter));
         saveFiltersAppliedForShort(filter);
         // Obtenemos el token y almacenamos en filterWithToken [[Token],[filtros]] --> [filtros] --> [[fuel,gasolina],[brand,bmw]]
-        token = [localStorage.getItem('guest_token')];
-        filterWithToken = token.concat([filter]);
-        // console.log(filterWithToken);
+        // Obtenemos el username almacenado en el token
+
+        let token_usr = localStorage.getItem('token');
 
         $('#highlight_searchs').empty();
-        
-
-        highlightFilter();
-
-
-        if (filterWithToken.length != 0) {
+        if(token_usr) {
+            ajaxPromise("module/login/ctrl/ctrl_login.php?op=dataUser", 'POST', 'JSON', { 'token': token_usr })
+            .then(function (data) { 
+                console.log(data);
+                token = [data[0]['username']];
+                filterWithToken = token.concat([filter]);
+                $('#highlight_searchs').empty();
+            highlightFilter();
             // ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filters_token", filterWithToken);
             ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filters_token", filterWithToken);
             saveFiltersAppliedForShort(filterWithToken[1]);
             pagination();
+            }).catch(function() {
+                console.log("Error al cargar data del usuario");
+            });
+        }else {
+            $('#highlight_searchs').empty();
+            highlightFilter();
+            console.log(filter);
+            ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", filter);
+            pagination();
         }
-        else {
-            ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=all_cars");
-        }
+
+        
+        // console.log(filterWithToken);
+
+        // $('#highlight_searchs').empty();
+        // highlightFilter();
+
+
+        // if (filterWithToken.length != 0) {
+        //     $('#highlight_searchs').empty();
+        //     highlightFilter();
+        //     // ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filters_token", filterWithToken);
+        //     ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filters_token", filterWithToken);
+        //     saveFiltersAppliedForShort(filterWithToken[1]);
+        //     pagination();
+        // }
+        // else {
+        //     $('#highlight_searchs').empty();
+        //     highlightFilter();
+        //     ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=all_cars");
+        // }
     });
 
     remove_filters();
@@ -713,7 +763,23 @@ function pagination(){
         });
 }
 
+// ==================== LIKES ====================  //
 
+function likes(cod_car){
+    // NI HA TOKEN MIREM EL LIKE
+    let token = localStorage.getItem('token');
+    if(token){
+        // console.log("User registred OK LIKE");
+        console.log(cod_car);
+        console.log(token);
+        // ajaxPromise('module/shop/ctrl/ctrl_shop.php?op=likes','POST', 'JSON', { 'token': token, 'cod_car': cod_car })
+        //     .then(function(data) {
+        //     console.log(data);
+        // });
+    }
+    // NO NI HA TOKEN ANEM AL LOGIN/REGISTRER
+    // ES REGISTRA TORNEM AL DETAIL ALMACENEM EL COCHE QUE PREVIAMENT HAVIA DONAT LIKE I EL PINTEM
+}
 
 $(document).ready(function() {
     loadLateralMenu();

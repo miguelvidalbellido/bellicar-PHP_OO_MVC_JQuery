@@ -187,6 +187,23 @@
             }
             // echo json_encode($_POST['id']);
             break;
+        
+        // case 'likes':
+        //         try{
+        //             $daoShop = new DAOShop();
+        //             $checkLike = $daoShop->checkLikes();
+        //         } catch(Exception $e){
+        //             echo json_encode("error");
+        //         }
+                
+        //         if(!empty($checkLike)){
+        //             echo json_encode($checkLike); 
+        //         }
+        //         else{
+        //             echo json_encode("error");
+        //         }
+        //     break;
+
     }
 
     

@@ -309,6 +309,18 @@
         
     }
 
+    // ================= LIKES ================= //
+    // function checkLikes($username, $cod_car){
+    //     $sql = "CALL likeOrDislike('$username',$cod_car,@result);"
+    //     $sql.= "SELECT @result AS 'result_operacion'";
+
+    //     $conexion = connect::con();
+    //     $res = mysqli_multy_query($conexion, $sql)->fetch_object();
+    //     connect::close($conexion);
+
+    //     return $res;
+    // }
+
 }
 
 
