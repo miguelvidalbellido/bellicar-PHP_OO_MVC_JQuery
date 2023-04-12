@@ -188,21 +188,37 @@
             // echo json_encode($_POST['id']);
             break;
         
-        // case 'likes':
-        //         try{
-        //             $daoShop = new DAOShop();
-        //             $checkLike = $daoShop->checkLikes();
-        //         } catch(Exception $e){
-        //             echo json_encode("error");
-        //         }
+        case 'likes':
+                try{
+                    $daoShop = new DAOShop();
+                    $checkLike = $daoShop->checkLikes($_POST['token'],$_POST['cod_car']);
+                } catch(Exception $e){
+                    echo json_encode("error");
+                }
                 
-        //         if(!empty($checkLike)){
-        //             echo json_encode($checkLike); 
-        //         }
-        //         else{
-        //             echo json_encode("error");
-        //         }
-        //     break;
+                if(!empty($checkLike)){
+                    echo json_encode($checkLike); 
+                }
+                else{
+                    echo json_encode("error");
+                }
+            break;
+
+        case 'likesUser':
+                try{
+                    $daoShop = new DAOShop();
+                    $checkLike = $daoShop->likesUser($_POST['token']);
+                } catch(Exception $e){
+                    echo json_encode("error");
+                }
+                
+                if(!empty($checkLike)){
+                    echo json_encode($checkLike); 
+                }
+                else{
+                    echo json_encode("error");
+                }
+            break;
 
     }
 

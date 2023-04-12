@@ -310,16 +310,46 @@
     }
 
     // ================= LIKES ================= //
-    // function checkLikes($username, $cod_car){
-    //     $sql = "CALL likeOrDislike('$username',$cod_car,@result);"
-    //     $sql.= "SELECT @result AS 'result_operacion'";
+    function checkLikes($username, $cod_car){
+        $sql = "CALL likeOrDislike('$username',$cod_car,@result);";
+        $sql.= "SELECT @result AS 'result_operacion'";
 
-    //     $conexion = connect::con();
-    //     $res = mysqli_multy_query($conexion, $sql)->fetch_object();
-    //     connect::close($conexion);
+        $conexion = connect::con();
+        mysqli_multi_query($conexion, $sql);
+        // Recorremos el retorno de mysql para comprobar si hay resultado hasta que lo encontramos y lo devolvemos con do-while
+        $res = null;
+        do {
+            if ($result = mysqli_store_result($conexion)) {
+                while ($row = mysqli_fetch_assoc($result)) {
+                    $res = $row['result_operacion'];
+                }
+                mysqli_free_result($result);
+            }
+        } while (mysqli_next_result($conexion));
+        connect::close($conexion);
 
-    //     return $res;
-    // }
+        return $res;
+    }
+
+    function likesUser($username){
+        $sql = "SELECT cod_car
+        FROM likes
+        WHERE username LIKE '$username'";
+        
+
+        $conexion = connect::con();
+        $res = mysqli_query($conexion, $sql);
+        connect::close($conexion);
+
+        $retrArray = array();
+        if ($res -> num_rows > 0) {
+            while ($row = mysqli_fetch_assoc($res)) {
+                $retrArray[] = $row;
+            }
+        }
+        return $retrArray;
+        
+    }
 
 }
 

@@ -5,13 +5,17 @@ function loadCars(total_prod = 0, items_page=4) {
     var checkFiltersHomeBodywork = JSON.parse(localStorage.getItem('homeBodyworkFilter')) || false;
     var checkFiltersSearch = JSON.parse(localStorage.getItem('filterSearch')) || false;
     var checkFiltersHomeModel = JSON.parse(localStorage.getItem('homeModelFilter')) || false;
-    
+    var checkPreLikeLogin = localStorage.getItem('codCarPreLogin') || false;
 
     getGuestToken()
         .then(function(checkLastFilters) {
             // console.log(checkLastFilters);
             // console.log(JSON.parse(localStorage.getItem('filterSearch')));
-            if(checkFiltersHomeModel != false){
+            if(checkPreLikeLogin != false){
+                details_car(checkPreLikeLogin);
+                likes(checkPreLikeLogin);
+                localStorage.removeItem('codCarPreLogin');
+            }else if(checkFiltersHomeModel != false){
                 ajaxForSearch("module/shop/ctrl/ctrl_shop.php?op=filter", [checkFiltersHomeModel], total_prod, items_page);
                 saveFiltersAppliedForShort([checkFiltersHomeModel]);
                 // localStorage.removeItem('homeModelFilter');
@@ -126,7 +130,7 @@ function ajaxForSearch(url,filter,total_prod = 0, items_page = 3){
     ajaxPromise(url, 'POST', 'JSON', { 'filter': filter, 'total_prod': total_prod, 'items_page': items_page  })
     .then(function(data) {
         $('#list_cars1').empty(); // Limpiamos el contenido de list_cars
-        console.log(data);
+        // console.log(data);
         if (data == "error") {
             $('<div></div>').appendTo('#list_cars1')
                 .html(
@@ -156,12 +160,13 @@ function ajaxForSearch(url,filter,total_prod = 0, items_page = 3){
                                     "<p class='text-center mt-4 bg-light rounded'>"+ data[row].publication_date+"</p>"+
                                     // "<p class=''> Potencia (cv): "+ data[row].power+"</p>"+
                                 "<button id='" + data[row].cod_car + "' class='more_info_car mt-3 button-86' role='button'>Ver más</button>"+
-                                "<a id='like_button' value='"+data[row].cod_car+"'><i class='bi bi-star text-primary' ></i><a>"+
+                                "<a id='like_button' value='"+data[row].cod_car+"'><i id='"+data[row].cod_car+"' class='bi bi-suit-heart-fill text-primary fa-lg'></i><a>"+
                                 "</div>"+
                             "</div>"+
                     "</div>"
                 )
-        }   
+        }
+        localStorage.getItem('token') !== null ? loadLikes(localStorage.getItem('token')) : console.log("no hay token");
         }
         mapBox_all(data);
     }).catch(function() {
@@ -249,13 +254,15 @@ function details_car(cod_car) {
                 "<a class='button add' href='#'>Add to Cart</a>" +
                 "<a class='button buy' href='#'>Buy</a>" +
                 // "<span class='button' id='price_details'>" + data[0].price + "<i class='fa-solid fa-euro-sign'></i> </span>" +
-                "<a class='details__heart' id='" + data[0].id_car + "'><i id=" + data[0].id_car + " class='fa-solid fa-heart fa-lg'></i></a>" +
+                // "<a class='details__heart' id='" + data[0].id_car + "'><i id=" + data[0].id_car + " class='fa-solid fa-heart fa-lg'></i></a>" +
+                "<a id='like_button' value='"+data[0].cod_car+"'><i id='"+data[0].cod_car+"' class='bi bi-suit-heart-fill text-primary fa-lg'></i><a>"+
                 "</div>" +
                 "</div>" +
                 "</div>" +
                 "</div>"
             )
         mapBox(data[0]);
+        loadLikes(localStorage.getItem('token'));
     }).catch(function() {
     // window.location.href = "index.php?module=ctrl_exceptions&op=503&type=503&lugar=Load_Details SHOP";
 });
@@ -769,16 +776,40 @@ function likes(cod_car){
     // NI HA TOKEN MIREM EL LIKE
     let token = localStorage.getItem('token');
     if(token){
-        // console.log("User registred OK LIKE");
-        console.log(cod_car);
-        console.log(token);
-        // ajaxPromise('module/shop/ctrl/ctrl_shop.php?op=likes','POST', 'JSON', { 'token': token, 'cod_car': cod_car })
-        //     .then(function(data) {
-        //     console.log(data);
-        // });
+        ajaxPromise('module/login/ctrl/ctrl_login.php?op=dataUser','POST', 'JSON', { 'token': token })
+            .then(function(data) {
+            let username = data[0]['username'];
+            ajaxPromise('module/shop/ctrl/ctrl_shop.php?op=likes','POST', 'JSON', { 'token': username, 'cod_car': cod_car })
+            .then(function(data) {
+                data == "LIKE" ? ( $('i[id="'+cod_car+'"]').removeClass('text-primary'), $('i[id="'+cod_car+'"]').addClass('text-danger') ) : ( $('i[id="'+cod_car+'"]').removeClass('text-danger'), $('i[id="'+cod_car+'"]').addClass('text-primary') );
+            });
+        });
+        
+    }else{
+        localStorage.setItem('codCarPreLogin', cod_car);
+        window.location.href = "index.php?page=ctrl_login&op=loginAndRegisterView";
     }
-    // NO NI HA TOKEN ANEM AL LOGIN/REGISTRER
-    // ES REGISTRA TORNEM AL DETAIL ALMACENEM EL COCHE QUE PREVIAMENT HAVIA DONAT LIKE I EL PINTEM
+
+}
+
+function loadLikes(token){
+
+    ajaxPromise('module/login/ctrl/ctrl_login.php?op=dataUser','POST', 'JSON', { 'token': token })
+    .then(function(data) {
+    let username = data[0]['username'];
+
+        ajaxPromise('module/shop/ctrl/ctrl_shop.php?op=likesUser','POST', 'JSON', { 'token': username })
+        .then(function(data) {
+            if(data != "error"){
+                data.forEach(function(elemento) {
+                    $('i[id="' + elemento['cod_car'] + '"]').removeClass('text-primary').addClass('text-danger');
+                });
+            }
+            // data.map(elemento => {
+            // $('i[id="' + elemento['cod_car'] + '"]').removeClass('text-primary').addClass('text-danger');
+            // });
+        });
+    });
 }
 
 $(document).ready(function() {
