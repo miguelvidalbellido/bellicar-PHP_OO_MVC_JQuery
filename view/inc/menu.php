@@ -42,6 +42,9 @@
           <div class="dropdown" id="dropdown_user">
             
           </div>
+          <div id="loadShopCart" class="p-3">
+
+          </div>
         </ul>
         <i class="bi bi-list mobile-nav-toggle"></i>
       </nav><!-- .navbar -->

@@ -19,11 +19,12 @@ function changeMenuAuth() {
     if(token) {
         ajaxPromise("module/login/ctrl/ctrl_login.php?op=dataUser", 'POST', 'JSON', { 'token': token })
         .then(function (data) { 
-            // console.log(data);
+            // Limpiamos los contenedores
             $('#highlight_searchs').empty();
             $('.men_login').remove();
             $('#dropdown_user').empty();
-            // $('<img src="' + data[0]['avatar'] + '" height="50vw" class="img-circle ml-2" id="avt_user">').appendTo('#navbar_user');
+            $('#loadShopCart').empty();
+            // Creamos el dropdown user
             $('<a href="#" id="imageDropdown" data-toggle="dropdown"><img height="40vw" src="'+ data[0]['avatar'] +'"></a>').appendTo('#dropdown_user');
             $('<ul class="dropdown-menu" id="dropdown_user_menu" role="menu" aria-labelledby="imageDropdown"></ul>').appendTo('#dropdown_user')
                 .html(
@@ -34,6 +35,8 @@ function changeMenuAuth() {
                     '<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Menu item 4</a></li>'
                 );
             data[0]['user_type'] == "admin" ? $('<li role="presentation"><a role="menuitem" tabindex="-1" href="index.php?page=ctrl_dashboard&op=launchView">Dashboard</a></li>').appendTo('#dropdown_user_menu') : undefined ;
+            // Cargamos el carrito (de momento solo icono)
+            $('<a href="index.php?page=ctrl_shopCart&op=list"><i class="bi bi-cart fa-6x"></i></a>').appendTo('#loadShopCart');
         }).catch(function() {
             console.log("Error al cargar data del usuario");
         });

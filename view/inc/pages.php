@@ -7,6 +7,9 @@
 			case "ctrl_dashboard";
 				include("module/dashboard/ctrl/".$_GET['page'].".php");
 				break;
+			case "ctrl_shopCart";
+				include("module/shopCart/ctrl/".$_GET['page'].".php");
+				break;
 			case "ctrl_home";
 				include("module/home/ctrl/".$_GET['page'].".php");
 				break;

@@ -9,6 +9,8 @@
 		include("view/inc/top_page_login.php");
 	}else if((isset($_GET['page'])) && ($_GET['page']==="ctrl_dashboard") ){ // Ctrl module shop
 		include("view/inc/top_page_dashboard.php");
+	}else if((isset($_GET['page'])) && ($_GET['page']==="ctrl_shopCart") ){ // Ctrl module shop
+		include("view/inc/top_page_shopCart.php");
 	}else{
 		include("view/inc/top_page.php");
 	}

@@ -621,18 +621,26 @@ function launcherDashboardForStats() {
     $('#tableData').hide();
     $('#cards_estadistics').empty();
     $('#spanbuttoncreate').remove();
+
+    $('<div class="col-xl-12 col-sm-12 col-12 text-center bg-secondary"></div>').appendTo('#cards_estadistics')
+        .html(
+            '<h2>Stats</h2>'
+        );
     brandMoreVisited();
     usersDateRegistration();
     bodyworkMoreVisited();
+    fuelMoreVisited();
+
+    
 
     function brandMoreVisited(){
         // Marca más buscada
-        $('<div class="col-xl-4 col-sm-4 col-12"></div>').appendTo('#cards_estadistics')
+        $('<div class="col-xl-3 col-sm-3 col-12"></div>').appendTo('#cards_estadistics')
         .html(
             '<div class="card shadow border-0 w-100">'+
                 '<div class="card-body">'+
                 '<span class="h6 font-semibold text-muted text-sm d-block mb-2">Marca más buscada</span>'+
-                '<canvas id="brandVisits-chart" width="400" height="225"></canvas>'+
+                '<canvas id="brandVisits-chart" width="100%" height="100%"></canvas>'+
                 '</div>'+
             '</div>'
         );
@@ -678,12 +686,12 @@ function launcherDashboardForStats() {
 
     function bodyworkMoreVisited(){
         // Marca más buscada
-        $('<div class="col-xl-4 col-sm-4 col-12"></div>').appendTo('#cards_estadistics')
+        $('<div class="col-xl-3 col-sm-3 col-12"></div>').appendTo('#cards_estadistics')
         .html(
             '<div class="card shadow border-0 w-100">'+
                 '<div class="card-body ">'+
                 '<span class="h6 font-semibold text-muted text-sm d-block mb-2">Marca más buscada</span>'+
-                '<canvas id="bodyworkVisits-chart" width="400" height="225"></canvas>'+
+                '<canvas id="bodyworkVisits-chart" width="100%" height="100%"></canvas>'+
                 '</div>'+
             '</div>'
         );
@@ -728,12 +736,12 @@ function launcherDashboardForStats() {
 
     function usersDateRegistration(){
         // Marca más buscada
-        $('<div class="col-xl-4 col-sm-4 col-12"></div>').appendTo('#cards_estadistics')
+        $('<div class="col-xl-3 col-sm-3 col-12"></div>').appendTo('#cards_estadistics')
         .html(
             '<div class="card shadow border-0 w-100">'+
                 '<div class="card-body">'+
                 '<span class="h6 font-semibold text-muted text-sm d-block mb-2">Nuevos usuarios por día</span>'+
-                '<canvas id="userRegistration-chart" width="800" height="450"></canvas>'+
+                '<canvas id="userRegistration-chart" width="100%" height="100%"></canvas>'+
                 '</div>'+
             '</div>'
         );
@@ -768,6 +776,57 @@ function launcherDashboardForStats() {
                 title: {
                     display: true,
                     text: 'Predicted world population (millions) in 2050'
+                }
+                }
+            });
+
+        }).catch(function() {
+        console.log("ERR: Data Visits Brands");
+        });
+
+    }
+
+    function fuelMoreVisited(){
+        // Marca más buscada
+        $('<div class="col-xl-3 col-sm-3 col-12"></div>').appendTo('#cards_estadistics')
+        .html(
+            '<div class="card shadow border-0 w-100">'+
+                '<div class="card-body">'+
+                '<span class="h6 font-semibold text-muted text-sm d-block mb-2">Combustible más buscado</span>'+
+                '<canvas id="fuelVisits-chart" width="100%" height="100%"></canvas>'+
+                '</div>'+
+            '</div>'
+        );
+
+        ajaxPromise('module/dashboard/ctrl/ctrl_dashboard.php?op=chartFuelMostVisited','GET', 'JSON')
+            .then(function(data) {
+            console.log(data);
+            let brands = [];
+            let visits = [];
+            for(row in data){
+                brands.push(data[row]['description']);
+                visits.push(data[row]['num_visits']);
+            }
+
+            // Eliminamos las comillas del array visits
+            let visitClear = visits.map(elemento => JSON.parse(elemento));
+            console.log(visitClear);
+            new Chart(document.getElementById("fuelVisits-chart"), {
+                type: 'doughnut',
+                data: {
+                labels: brands,
+                datasets: [
+                    {
+                    label: "Busquedas",
+                    backgroundColor: ["#3e92cd", "#8e1ea2","#3cba2f","#e8c3b5","#c45850"],
+                    data: visitClear
+                    }
+                ]
+                },
+                options: {
+                title: {
+                    display: true,
+                    text: 'Fuel: '
                 }
                 }
             });

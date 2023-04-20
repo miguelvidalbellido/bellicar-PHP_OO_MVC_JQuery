@@ -191,6 +191,7 @@ include('C:\xampp\htdocs\coches_net\module\dashboard\model\DAO_dashboard.php');
             echo json_encode("error");
         }
         break;
+
     case 'chartBodyworkMostVisited':
         try{
             $daoDashboard = new DAODashboard();
@@ -201,6 +202,22 @@ include('C:\xampp\htdocs\coches_net\module\dashboard\model\DAO_dashboard.php');
     
         if(!empty($bodyworkVisits)){
             echo json_encode($bodyworkVisits); 
+        }
+        else{
+            echo json_encode("error");
+        }
+        break;
+    
+    case 'chartFuelMostVisited':
+        try{
+            $daoDashboard = new DAODashboard();
+            $fuelVisits = $daoDashboard->fuelMoreVisited();
+        } catch(Exception $e){
+            echo json_encode("error");
+        }
+        
+        if(!empty($fuelVisits)){
+            echo json_encode($fuelVisits); 
         }
         else{
             echo json_encode("error");

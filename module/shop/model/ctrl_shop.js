@@ -221,7 +221,7 @@ function details_car(cod_car) {
     ajaxPromise('module/shop/ctrl/ctrl_shop.php?op=details_car&id=' + cod_car,'GET', 'JSON')
     .then(function(data) {
     $('#list_cars').empty();
-        
+        // console.log(data[0]);
         for (row in data[1][0]) {
             $('<swiper-slide></swiper-slide>').appendTo('#container-date-img')
                 .html(
@@ -259,10 +259,33 @@ function details_car(cod_car) {
                 "</div>" +
                 "</div>" +
                 "</div>" +
+                "<div class='border w-50 mt-5 '>"+
+                    "<div class='d-flex justify-content-center'>"+
+                        "<table>"+
+                            "<td><p class='font-weight-bold'>"+ data[0].state +":</p></td></tr>"+
+                            "<td><p class='h4'>"+ data[0].price +"</p></td>"+
+                            "<td class='ml-5'><p class=' h4 text-success'>En stock</p></td></tr>"+
+                            "<td>"+
+                               "<div class='quantity-field' >"+
+                                    "<button class='value-button decrease-button' id='lessProduct' title='Azalt'>-</button>"+
+                                    "<div class='number' data-codCar='"+data[0].cod_car+"' id='quantityProductDetails'>0</div>"+
+                                    "<button class='value-button increase-button' id='moreProduct' title='Arrtır'>+</button>"+
+                                "</div>"+
+                            "</td>"+
+                            "<td>"+
+                                "<button type='button' class='btn btn-default btn-sm' id='addToCart' data-codCar='"+data[0].cod_car+"'>"+
+                                "<span class='glyphicon  glyphicon-shopping-cart'> </span>"+
+                                "<b> Add to Cart </b>"+
+                            "</button>"+
+                            "</td>"+
+                        "</table>"+
+                    "</div>"+
+                "</div>"+
                 "</div>"
             )
         mapBox(data[0]);
         loadLikes(localStorage.getItem('token'));
+        controlCart();
     }).catch(function() {
     // window.location.href = "index.php?module=ctrl_exceptions&op=503&type=503&lugar=Load_Details SHOP";
 });
@@ -808,6 +831,69 @@ function loadLikes(token){
             // data.map(elemento => {
             // $('i[id="' + elemento['cod_car'] + '"]').removeClass('text-primary').addClass('text-danger');
             // });
+        });
+    });
+}
+
+// ==================== ADD PRODUCT DETAILS TO SHOP ====================  //
+
+const controlCart = () => {
+    incrementProducts();
+    decreaseProducts();
+    addToCart();
+}
+
+const addToCart = () => {
+    $(document).on("click", "#addToCart", function() {
+        let id_car = $('#addToCart').data("codcar");
+        let value = parseInt($('#quantityProductDetails').text());
+        console.log(id_car);
+        console.log(value);
+    }); 
+};
+
+const incrementProducts = () => {
+    $(document).on("click", "#moreProduct", function() {
+        let value = parseInt($('#quantityProductDetails').text());
+        let id_car = $('#quantityProductDetails').data("codcar");
+        (async () => {
+            try {
+                quantity = await checkMaxStock(id_car);
+                value < quantity ? $('#quantityProductDetails').text(value+1) : toastr.error('Solo puedes añadir al carrito '+quantity+' unidades');
+            } catch (error) {
+                console.log(error);
+            }
+        })();
+        
+    });
+};
+
+const decreaseProducts = () => {
+    $(document).on("click", "#lessProduct", function() {
+        let value = parseInt($('#quantityProductDetails').text());
+        let id_car = $('#quantityProductDetails').data("codcar");
+        let quantity;
+        // obtenemos el valor de quantity stock
+        (async () => {
+            try {
+                quantity = await checkMaxStock(id_car);
+                value != 0 ? $('#quantityProductDetails').text(value-1) : undefined;
+            } catch (error) {
+                console.log(error);
+            }
+        })();
+    });
+}
+
+const checkMaxStock = (codCar) => {
+        return new Promise((resolve, reject) => {
+            ajaxPromise("module/shopCart/ctrl/ctrl_shopCart.php?op=checkStock", 'POST', 'JSON', { 'id_car': codCar })
+        .then(function (data) {
+            resolve(data.quantity);
+        })
+        .catch(function() {
+            console.log("error ajaxForSearch CheckStock");
+            reject("error ajaxForSearch CheckStock");
         });
     });
 }

@@ -187,5 +187,25 @@
             return $retrArray;
     }
 
+    function fuelMoreVisited() {
+        $sql = "SELECT t.description, SUM(v.num_visits) AS 'num_visits'
+        FROM car c, visits v, type_motor t
+        WHERE v.cod_car = c.cod_car AND t.cod_fuel = c.cod_typemotor
+        GROUP BY c.cod_typemotor
+        ORDER BY v.num_visits DESC";
+
+        $conexion = connect::con();
+        $res = mysqli_query($conexion, $sql);
+        connect::close($conexion);
+
+        $retrArray = array();
+            if(mysqli_num_rows($res)>0){
+                while($row = mysqli_fetch_assoc($res)){
+                    $retrArray[] = $row;
+                }
+            }
+            return $retrArray;
+    }
+
     }
 ?>
