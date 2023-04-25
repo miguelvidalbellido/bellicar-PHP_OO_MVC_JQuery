@@ -281,6 +281,7 @@ function details_car(cod_car) {
                         "</table>"+
                     "</div>"+
                 "</div>"+
+                "<div id='loadModalAddCart'></div>"+ 
                 "</div>"
             )
         mapBox(data[0]);
@@ -847,9 +848,31 @@ const addToCart = () => {
     $(document).on("click", "#addToCart", function() {
         let id_car = $('#addToCart').data("codcar");
         let value = parseInt($('#quantityProductDetails').text());
-        console.log(id_car);
-        console.log(value);
+        value == 0 ? undefined : promiseAdd(id_car, value);
+        // console.log(id_car);
+        // console.log(value);
     }); 
+
+    const promiseAdd = (cod_car, quantity) => {
+        let token = localStorage.getItem('token') || false;
+        if(token == false){
+            console.log('Redireccionamos a login');
+        }else {
+            ajaxPromise("module/login/ctrl/ctrl_login.php?op=dataUser", 'POST', 'JSON', { 'token': token })
+            .then(function (data) { 
+                let username = data[0]['username'];
+                
+                ajaxPromise("module/shopCart/ctrl/ctrl_shopCart.php?op=addToCartFromDetails", 'POST', 'JSON', { 'username': username, 'cod_car': cod_car, 'quantity': quantity })
+                .then(function (data) { 
+                    // console.log(data);
+                    data == "addCartOK" ? toastr.error('El producto ha sido añadido al carrito de forma exitosa') : toastr.error('El stock es insuficiente, modifica la cantidad ');
+                });
+
+            });
+        }
+    }
+
+
 };
 
 const incrementProducts = () => {
