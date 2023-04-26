@@ -6,12 +6,16 @@ function loadCars(total_prod = 0, items_page=4) {
     var checkFiltersSearch = JSON.parse(localStorage.getItem('filterSearch')) || false;
     var checkFiltersHomeModel = JSON.parse(localStorage.getItem('homeModelFilter')) || false;
     var checkPreLikeLogin = localStorage.getItem('codCarPreLogin') || false;
+    var checkPreAddLogin = localStorage.getItem('codCarPreAddToCart') || false;
 
     getGuestToken()
         .then(function(checkLastFilters) {
             // console.log(checkLastFilters);
             // console.log(JSON.parse(localStorage.getItem('filterSearch')));
-            if(checkPreLikeLogin != false){
+            if(checkPreAddLogin != false){
+                details_car(checkPreAddLogin);
+                localStorage.removeItem('codCarPreAddToCart');
+            }else if(checkPreLikeLogin != false){
                 details_car(checkPreLikeLogin);
                 likes(checkPreLikeLogin);
                 localStorage.removeItem('codCarPreLogin');
@@ -846,11 +850,20 @@ const controlCart = () => {
 
 const addToCart = () => {
     $(document).on("click", "#addToCart", function() {
-        let id_car = $('#addToCart').data("codcar");
-        let value = parseInt($('#quantityProductDetails').text());
-        value == 0 ? undefined : promiseAdd(id_car, value);
-        // console.log(id_car);
-        // console.log(value);
+        let token = localStorage.getItem('token');
+        if(token){
+            let id_car = $('#addToCart').data("codcar");
+            let value = parseInt($('#quantityProductDetails').text());
+            value == 0 ? undefined : promiseAdd(id_car, value);
+            // console.log(id_car);
+            // console.log(value);
+        }else {
+            // console.log('redireccionem a login');
+            let id_car = $('#addToCart').data("codcar");
+            localStorage.setItem('codCarPreAddToCart', id_car);
+            window.location.href = "index.php?page=ctrl_login&op=loginAndRegisterView";
+        }
+        
     }); 
 
     const promiseAdd = (cod_car, quantity) => {
@@ -872,6 +885,9 @@ const addToCart = () => {
         }
     }
 
+    const modalAlertAdd = () => {
+        
+    }
 
 };
 

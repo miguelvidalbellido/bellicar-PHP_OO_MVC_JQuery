@@ -184,6 +184,5 @@ const controlButtons = () => {
 $(document).ready(function() {
     loadCart();
     controlButtons();
-    generatePDF();
     // incrementProducts();
 });

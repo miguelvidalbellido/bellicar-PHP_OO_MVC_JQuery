@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 26-03-2023 a las 14:30:46
+-- Tiempo de generación: 26-04-2023 a las 17:26:51
 -- Versión del servidor: 10.4.27-MariaDB
 -- Versión de PHP: 8.1.12
 
@@ -25,6 +25,144 @@ DELIMITER $$
 --
 -- Procedimientos
 --
+CREATE DEFINER=`root`@`localhost` PROCEDURE `addToCartDetails` (IN `username_E` VARCHAR(255), IN `cod_car_E` INT(255), IN `quantity_E` INT(255), OUT `resultado` VARCHAR(255))   BEGIN
+    	# VARIABLES
+        DECLARE estaAgregado INT(10);
+        DECLARE cantidadAgregado INT(255);
+        DECLARE cantidadSumada INT(255);
+        DECLARE cantidadStock INT(255);
+    	# COMPROBAMOS SI YA LO TIENE AGREGADO AL CARRITO
+        SELECT COUNT(*) INTO estaAgregado FROM temporal_cart WHERE username LIKE username_E AND cod_car = cod_car_E;
+        
+       	IF 1 = estaAgregado THEN
+        	# ESTA YA EN EL CARRITO
+            # ALMACENAMOS LA SUMA DE CANTIDADES DEL MISMO PRODUCTO
+            SELECT quantity INTO cantidadAgregado FROM temporal_cart WHERE username LIKE username_E AND cod_car = cod_car_E;
+            SET cantidadSumada = cantidadAgregado + quantity_E;
+            
+            SELECT quantity INTO cantidadStock FROM stock WHERE id_car = cod_car_E;
+            IF cantidadSumada <= cantidadStock THEN
+            	UPDATE temporal_cart SET quantity = cantidadSumada WHERE username LIKE username_E AND cod_car = cod_car_E;
+            	SET resultado = "addCartOK";
+            ELSE
+            	SET resultado = "moreQuantityThanStock";
+            END IF;
+        ELSE
+        	# NO ESTA EN EL CARRITO
+        	SELECT quantity INTO cantidadStock FROM stock WHERE id_car = cod_car_E;
+            IF quantity_E <= cantidadStock THEN
+            	INSERT INTO temporal_cart(username,cod_car,quantity) VALUES(username_E,cod_car_E,quantity_E);
+            	SET resultado = "addCartOK";
+            ELSE
+            	SET resultado = "moreQuantityThanStock";
+            END IF;
+        END IF;
+        
+    END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `changeCart` (IN `cod_car_e` INT(255), IN `username_e` VARCHAR(255), IN `quantity_e` INT(255), OUT `resultado` VARCHAR(255))   BEGIN
+    	DECLARE stock_total INT(255);
+        SELECT quantity INTO stock_total FROM stock WHERE id_car = cod_car_e;
+        IF quantity_e <= stock_total THEN
+        	UPDATE temporal_cart SET quantity = quantity_e WHERE cod_car = cod_car_e AND username LIKE username_e;
+            SET resultado = "UpdateOk";
+        ELSE
+        	SET resultado = "moreQuantityThanStock";
+        END IF;
+    END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `checkout` (IN `username_e` VARCHAR(255), OUT `res` VARCHAR(255))   BEGIN
+        	## DECLARAMOS LAS VARIABLES
+        	DECLARE stock_tmp INT;
+        	DECLARE quantity_tmp INT;
+            DECLARE cant_productos INT;
+            DECLARE contador INT;
+            DECLARE precio_total INT;
+			DECLARE id_fact_tmp INT;
+            DECLARE cod_car_tmp INT;
+            DECLARE quantity_tmp_lf INT;
+            DECLARE price_x_unit_tmp INT;
+
+        	## DECLARAMOS LOS ROLLBACK PARA EVITAR ERRORES
+        	DECLARE exit handler FOR SQLEXCEPTION
+            	BEGIN
+                	-- ERROR
+                    ROLLBACK;
+                END;
+            DECLARE exit handler FOR SQLWARNING
+            	BEGIN
+                	-- WARNING
+                    ROLLBACK;
+                END;
+             
+            START TRANSACTION;
+            	SET contador = 0;
+                ## OBTENEMOS EL VALOR TOTAL DE LA COMPRA NECESARIO PARA LA FACTURA
+                SELECT SUM(tmp.total_unitario) INTO precio_total
+                    FROM (SELECT tc.quantity * c.price AS 'total_unitario'
+                            FROM temporal_cart tc, car c
+                            WHERE tc.cod_car = c.cod_car AND tc.username LIKE username_e) AS tmp;
+                ## CREAMOS LA FACTURA
+                INSERT INTO facturas(username, fecha_compra,precio_total) VALUES(username_e, NOW(), precio_total);
+                SELECT last_insert_id() INTO id_fact_tmp;
+       
+                ## OBTENEMOS LAS ITERACIONES PARA EL LOOP
+                SELECT COUNT(*) INTO cant_productos
+                FROM temporal_cart 
+                WHERE username LIKE username_e;
+                
+                WHILE contador < cant_productos DO
+	                ## OBTENEMOS STOCK DE X VEHICULO
+                    SELECT quantity INTO stock_tmp
+                    FROM stock 
+                    WHERE id_car = (SELECT MIN(cod_car)
+                                    FROM temporal_cart
+                                    WHERE username LIKE username_e);
+                                    
+					## Cantidad de stock que desea el cliente de x vehiculo
+					SELECT quantity INTO quantity_tmp
+                    FROM temporal_cart
+                    WHERE cod_car = (SELECT MIN(cod_car)
+                                   FROM temporal_cart
+                                   WHERE username LIKE username_e) AND username LIKE username_e;
+					IF quantity_tmp <= stock_tmp THEN
+                    	
+                    	SELECT MIN(tc1.cod_car) INTO cod_car_tmp
+                        FROM temporal_cart tc1
+                        WHERE tc1.username LIKE username_e;
+                        
+                        ## MODIFICAMOS EL STOCK
+                        UPDATE stock SET quantity = (stock_tmp - quantity_tmp) WHERE id_car = cod_car_tmp;
+                        
+                        SELECT quantity INTO quantity_tmp_lf
+                        FROM temporal_cart
+                        WHERE username LIKE username_e AND cod_car = (SELECT MIN(tc1.cod_car)
+                                                                     FROM temporal_cart tc1
+                                                                     WHERE tc1.username LIKE username_e);
+                        
+                        SELECT price INTO price_x_unit_tmp
+                        FROM car
+                        WHERE cod_car = cod_car_tmp;
+                        
+                        ## INSERT SE REALIZA MEDIANTE TRIGGER
+						#INSERT INTO lineas_factura
+                        #VALUES(username_e, id_fact_tmp, cod_car_tmp, quantity_tmp_lf, price_x_unit_tmp, NOW());
+                        
+                    	DELETE FROM temporal_cart
+                        WHERE username LIKE username_e AND cod_car = (SELECT MIN(tc1.cod_car)
+                                                                     FROM temporal_cart tc1
+                                                                     WHERE tc1.username LIKE username_e);
+						SET res = 'CHECKOUT_OK';
+					ELSE
+                        SET res = 'ERROR_QUANTITY';
+                    	ROLLBACK;
+                    END IF;
+                    SET contador = contador + 1;
+                END WHILE;
+            COMMIT;
+
+        END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `count_all_cars` (OUT `cant_coches` INT)   BEGIN
     	SELECT COUNT(*) as 'cant_coches'
         FROM car c, image i, model m, brand b, state s, population p, province pr, type_motor ty, location loc
@@ -41,6 +179,19 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `increment_visits` (IN `cod_car_cli`
         	INSERT INTO visits VALUES(cod_car_cli, 1);
         END IF;
     END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `likeOrDislike` (IN `username_e` VARCHAR(255), IN `cod_car_e` INT(255), OUT `resultado` VARCHAR(255))   BEGIN
+        	DECLARE result INT;
+            	SELECT COUNT(*) FROM likes WHERE username LIKE username_e AND cod_car = cod_car_e INTO result;
+            CASE result
+            	WHEN 0 THEN
+                INSERT INTO likes(username,cod_car,d_like) VALUES(username_e,cod_car_e, NOW());
+                	SET resultado = "LIKE";
+                WHEN 1 THEN
+                DELETE FROM likes WHERE username LIKE username_e AND cod_car = cod_car_e;
+                	SET resultado = "DISLIKE";
+           END CASE;
+        END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `loginUser` (IN `username_e` VARCHAR(255), IN `password_e` VARCHAR(255), OUT `resultado` VARCHAR(255))   BEGIN
     	DECLARE existe_alm INT;
@@ -318,6 +469,42 @@ INSERT INTO `extras` (`cod_extra`, `description`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `facturas`
+--
+
+CREATE TABLE `facturas` (
+  `id_fact` int(255) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `fecha_compra` datetime DEFAULT NULL,
+  `precio_total` int(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Volcado de datos para la tabla `facturas`
+--
+
+INSERT INTO `facturas` (`id_fact`, `username`, `fecha_compra`, `precio_total`) VALUES
+(21, 'admin11', '2023-04-25 02:49:26', 75000),
+(22, 'admin11', '2023-04-25 02:49:37', 176400),
+(23, 'admin11', '2023-04-25 02:51:36', 255000),
+(27, 'admin11', '2023-04-25 03:06:12', 100000),
+(28, 'admin11', '2023-04-25 12:04:29', 50000),
+(29, 'admin11', '2023-04-25 12:05:32', 50000),
+(30, 'admin11', '2023-04-25 12:05:57', 100000),
+(31, 'admin11', '2023-04-25 12:06:16', 150000),
+(32, 'admin11', '2023-04-25 12:06:40', 75000),
+(33, 'admin11', '2023-04-25 12:07:03', 100000),
+(38, 'admin11', '2023-04-25 12:16:26', 125000),
+(42, 'admin11', '2023-04-25 12:38:43', 100000),
+(43, 'admin11', '2023-04-25 12:41:05', 507300),
+(44, 'admin11', '2023-04-25 12:43:21', 75000),
+(47, 'admin11', '2023-04-25 12:49:54', 100000),
+(49, 'admin11', '2023-04-25 13:08:14', 201400),
+(50, 'admin11', '2023-04-25 18:53:15', 295500);
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `historyfilters`
 --
 
@@ -466,7 +653,25 @@ INSERT INTO `historyfilters` (`token_guest`, `filters`, `dateSearch`) VALUES
 (' 79.143.132.181 ', 'fuel,diesel', '2023-03-21'),
 (' 79.143.132.181 ', 'brand,volkswagen', '2023-03-21'),
 (' 213.0.87.134 ', 'fuel,electrico', '2023-03-21'),
-(' 213.0.87.134 ', 'fuel,electrico', '2023-03-21');
+(' 213.0.87.134 ', 'fuel,electrico', '2023-03-21'),
+(' 79.143.132.181 ', 'fuel,diesel', '2023-04-02'),
+(' 79.143.132.181 ', 'fuel,electrico', '2023-04-02'),
+(' 79.143.132.181 ', 'fuel,diesel', '2023-04-02'),
+(' admin11 ', 'fuel,diesel', '2023-04-02'),
+(' admin11 ', 'fuel,diesel:brand,bmw', '2023-04-02'),
+(' admin11 ', 'fuel,electrico', '2023-04-02'),
+(' pruebas12 ', 'fuel,electrico', '2023-04-02'),
+(' pruebas12 ', 'brand,bmw', '2023-04-02'),
+(' pruebas12 ', 'type_shifter,Manual', '2023-04-02'),
+(' admin11 ', 'fuel,diesel', '2023-04-03'),
+(' admin11 ', 'fuel,electrico', '2023-04-04'),
+(' admin11 ', 'fuel,electrico', '2023-04-04'),
+(' admin11 ', 'fuel,electrico', '2023-04-11'),
+(' admin11 ', 'fuel,diesel', '2023-04-11'),
+(' admin11 ', 'fuel,gasolina', '2023-04-12'),
+(' admin11 ', 'fuel,diesel', '2023-04-19'),
+(' admin11 ', 'fuel,electrico', '2023-04-19'),
+(' admin11 ', 'fuel,diesel', '2023-04-24');
 
 -- --------------------------------------------------------
 
@@ -516,6 +721,62 @@ INSERT INTO `image` (`cod_image`, `url_image`, `chassis_number`) VALUES
 (30, 'view/img/car_image/1GCZGJDL7A4194288-2.png', '1GCZGJDL7A4194288'),
 (31, 'view/img/car_image/1GCZGJDL7A4194288-3.png', '1GCZGJDL7A4194288'),
 (32, 'view/img/car_image/1GCZGJDL7A4194288-4.png', '1GCZGJDL7A4194288');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `likes`
+--
+
+CREATE TABLE `likes` (
+  `username` varchar(255) NOT NULL,
+  `cod_car` int(255) NOT NULL,
+  `d_like` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Volcado de datos para la tabla `likes`
+--
+
+INSERT INTO `likes` (`username`, `cod_car`, `d_like`) VALUES
+('admin11', 10, '2023-04-12'),
+('admin11', 11, '2023-04-12'),
+('admin11', 5, '2023-04-12'),
+('admin11', 2, '2023-04-12'),
+('admin11', 8, '2023-04-12'),
+('test12', 1, '2023-04-12'),
+('admin11', 1, '2023-04-19');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `lineas_factura`
+--
+
+CREATE TABLE `lineas_factura` (
+  `username` varchar(255) NOT NULL,
+  `id_fact` int(255) NOT NULL,
+  `cod_car` int(255) NOT NULL,
+  `quantity` int(255) NOT NULL,
+  `priceByUnit` float DEFAULT NULL,
+  `d_purchase` date DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Volcado de datos para la tabla `lineas_factura`
+--
+
+INSERT INTO `lineas_factura` (`username`, `id_fact`, `cod_car`, `quantity`, `priceByUnit`, `d_purchase`) VALUES
+('admin11', 42, 1, 4, 25000, '2023-04-25'),
+('admin11', 43, 1, 2, 25000, '2023-04-25'),
+('admin11', 43, 2, 3, 44100, '2023-04-25'),
+('admin11', 43, 5, 13, 25000, '2023-04-25'),
+('admin11', 44, 1, 3, 25000, '2023-04-25'),
+('admin11', 47, 1, 4, 25000, '2023-04-25'),
+('admin11', 49, 1, 1, 25000, '2023-04-25'),
+('admin11', 49, 2, 4, 44100, '2023-04-25'),
+('admin11', 50, 2, 5, 44100, '2023-04-25'),
+('admin11', 50, 4, 3, 25000, '2023-04-25');
 
 -- --------------------------------------------------------
 
@@ -710,6 +971,100 @@ INSERT INTO `state` (`cod_state`, `description`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `stock`
+--
+
+CREATE TABLE `stock` (
+  `id_car` int(255) NOT NULL,
+  `quantity` int(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Volcado de datos para la tabla `stock`
+--
+
+INSERT INTO `stock` (`id_car`, `quantity`) VALUES
+(1, 8),
+(2, 108),
+(3, 100),
+(4, 97),
+(5, 87),
+(6, 100),
+(7, 100),
+(8, 100),
+(9, 100),
+(10, 100),
+(11, 100),
+(12, 100);
+
+--
+-- Disparadores `stock`
+--
+DELIMITER $$
+CREATE TRIGGER `controlTemporalCartFromStock_AU` AFTER UPDATE ON `stock` FOR EACH ROW BEGIN
+        	IF OLD.quantity != NEW.quantity THEN
+            	IF NEW.quantity = 0 THEN
+                	DELETE FROM temporal_cart WHERE cod_car = OLD.id_car;
+                ELSE 
+                	UPDATE temporal_cart SET quantity = NEW.quantity WHERE cod_car = OLD.id_car AND quantity > NEW.quantity;
+                END IF;
+            END IF;
+        END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `temporal_cart`
+--
+
+CREATE TABLE `temporal_cart` (
+  `username` varchar(255) NOT NULL,
+  `cod_car` int(255) NOT NULL,
+  `quantity` int(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Volcado de datos para la tabla `temporal_cart`
+--
+
+INSERT INTO `temporal_cart` (`username`, `cod_car`, `quantity`) VALUES
+('99', 99, 101),
+('miguel', 1, 2),
+('paco', 1, 8);
+
+--
+-- Disparadores `temporal_cart`
+--
+DELIMITER $$
+CREATE TRIGGER `tempral_cart_AD` AFTER DELETE ON `temporal_cart` FOR EACH ROW BEGIN
+        	DECLARE username VARCHAR(255);
+            DECLARE id_fact INT;
+            DECLARE priceByUnit INT;
+            
+            SELECT f1.username INTO username
+            FROM facturas f1
+            WHERE f1.fecha_compra = (SELECT MAX(f.fecha_compra)
+                                     FROM facturas f);
+			SELECT f1.id_fact INTO id_fact
+            FROM facturas f1
+            WHERE f1.fecha_compra = (SELECT MAX(f.fecha_compra)
+                                     FROM facturas f);
+			
+            SELECT c.price INTO priceByUnit
+            FROM car c
+            WHERE c.cod_car = OLD.cod_car;
+            
+        	INSERT INTO lineas_factura(username, id_fact, cod_car, quantity, priceByUnit, d_purchase)
+            VALUES(username, id_fact, old.cod_car, old.quantity, priceByUnit, NOW());
+        END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `type_motor`
 --
 
@@ -755,14 +1110,15 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id_user`, `username`, `password`, `email`, `d_birth`, `d_registration`, `avatar`, `user_type`) VALUES
-(1, 'miguel', '123456', 'miguel@gmail.com', '2023-03-01', '2023-03-24', 'avatar', 'client'),
-(6, 'davide', 'gMLiQLUf7T3Zj4e##', 'davide@gmail.com', '2023-03-08', '2023-03-24', 'avt', 'client'),
-(7, 'pacojones', 'gMLiQLUf7T3Zj4e##', 'pacojones@gmail.com', '2023-03-15', '2023-03-24', 'avt', 'client'),
-(8, 'benitocam', '$2y$12$NlA8fvHXzBsjFq1y9V8hUu/TScrs3Ni8/e9XgEp9/WuoxlGJE.SYu', 'benitocam@gmail.com', '2023-03-14', '2023-03-24', 'https://i.pravatar.cc/500?u=b9629b5b3af854710038857f265a1ef1', 'client'),
-(9, 'miguel2', '$2y$12$QYT8IWjdA3LSmndbhg7xi.wDHsvaqav56P6EcjjFeCc1j78NGF5Zm', 'miguel2@gmail.com', '2023-03-09', '2023-03-24', 'https://i.pravatar.cc/500?u=e5d5594cddef934d39f30a4471b1c275', 'client'),
-(10, 'miguel3', '$2y$12$dNAa6jDLb/jVNDBuspJXOObQkiK7Xvwh6a0HBHXtJLIqNyO3IjNve', 'Miguel3@gmail.com', '2023-03-02', '2023-03-24', 'https://i.pravatar.cc/500?u=3a48875d82f1f52e8504f121f6e4bebf', 'client'),
-(11, 'yolanda', '$2y$12$u0hlPJCIy139.WDtpFhcGequOv3H9LUMUMlVMiG7u5AQ3hhM2xdBO', 'yol@gmail.com', '2023-03-03', '2023-03-26', 'https://i.pravatar.cc/500?u=c76e9ebe9bc6f7c47d59927223f449dc', 'client'),
-(12, 'carmen', '$2y$12$hBu/7R2jGpWZjf70oz2G2OpQCYmc0UFrYRwTrtVBD0RZUk7aFYUP2', 'carmen@gmail.com', '2023-03-03', '2023-03-26', 'https://i.pravatar.cc/500?u=1073cd4179e1610ccdaa60d316ebc6c8', 'client');
+(12, 'carmenbell', '$2y$12$hBu/7R2jGpWZjf70oz2G2OpQCYmc0UFrYRwTrtVBD0RZUk7aFYUP2', 'carmen@gmail.com', '0000-00-00', '2023-03-26', 'https://i.pravatar.cc/500?u=1073cd4179e1610ccdaa60d316ebc6c8', 'client'),
+(15, 'pruebas12', '$2y$12$U026C2IVSkj2qxy1Im96LOI778UPFYCYotEroHftFUD4DS0dva/0i', 'pruebas1@gmail.com', '0000-00-00', '2023-03-28', 'https://i.pravatar.cc/500?u=772bd786ab221b0b952b8f55058366a6', 'client'),
+(18, 'paquito', '$2y$12$oz6vBdGmIoYrQAQ2vS95vOXm0DpbLwc4HNgrI8mwITP7s/phMQZeG', 'paquito@gmail.com', '2023-04-12', '2023-04-01', 'https://i.pravatar.cc/500?u=93e1388551530368e35fcbf044f55bf8', 'client'),
+(19, 'joseramon', '$2y$12$axyM0QeSrI0.2x081gV/ielbhqWY7/mCvmH9IS2b7HU06rHFcWU/y', 'joseramon@gmail.com', '2023-04-12', '2023-04-01', 'https://i.pravatar.cc/500?u=fcdac7d018248639566b80d266df749f', 'client'),
+(20, 'manolo', '$2y$12$N37PUWJAoisZ3Ph4x0pVXOmoo2N8D8lg0XohnIjGrjAcMb7hOhckm', 'manolo@gmail.com', '2023-04-12', '2023-04-01', 'https://i.pravatar.cc/500?u=e385b365f3f0eba03ac3d244bdc172db', 'client'),
+(22, 'admin11', '$2y$12$FbUFNIXTSMlDwsXILJkBIu03lVKj20FsxT.9HYU.uAv85U2JzfYES', 'admin11@gmail.com', '2023-04-06', '2023-04-02', 'https://i.pravatar.cc/500?u=5d58848e2a552421f202f3e397526f4f', 'admin'),
+(28, 'maricarmen', '$2y$12$Z53SjUTB7Umzh8Eflcvq2.qvEhqMqb6U1NGgeeq9qrMudoIEIHFLe', 'maricarmen@gmail.com', '2023-04-03', '2023-04-04', 'https://i.pravatar.cc/500?u=9100e3ed168e5e259b13276225b23c9c', 'client'),
+(29, 'testee', '$2y$12$cswQUeBdnLFjUduatH0ruOrx0Ba5YFXswGd7uBW/y2GaxIb7kASCW', 'teste@gmail.com', '2023-04-13', '2023-04-11', 'https://i.pravatar.cc/500?u=d1ca18cecaa470117672980092647dfe', 'client'),
+(30, 'miguel', '$2y$12$mfygEi4ConnVjMSzis/RGukHRvJjo2dfeoiQhaNaFJsJOpLUAO6lW', 'miguel@gmail.com', '2023-04-04', '2023-04-25', 'https://i.pravatar.cc/500?u=c952ec83eabde595820603a3ca9d7f54', 'client');
 
 -- --------------------------------------------------------
 
@@ -780,20 +1136,21 @@ CREATE TABLE `visits` (
 --
 
 INSERT INTO `visits` (`cod_car`, `num_visits`) VALUES
-(1, 110),
-(2, 11),
-(5, 1),
+(1, 286),
+(2, 24),
+(5, 8),
 (6, 2),
 (7, 2),
 (12, 4),
-(11, 3),
+(11, 6),
 (NULL, 1),
 (3, 1),
-(4, 1),
-(8, 1),
+(4, 9),
+(8, 2),
 (9, 1),
-(10, 1),
-(13, 2);
+(10, 2),
+(13, 2),
+(0, 1);
 
 --
 -- Índices para tablas volcadas
@@ -842,6 +1199,12 @@ ALTER TABLE `extras`
   ADD PRIMARY KEY (`cod_extra`);
 
 --
+-- Indices de la tabla `facturas`
+--
+ALTER TABLE `facturas`
+  ADD PRIMARY KEY (`id_fact`);
+
+--
 -- Indices de la tabla `image`
 --
 ALTER TABLE `image`
@@ -882,6 +1245,12 @@ ALTER TABLE `shifter`
 --
 ALTER TABLE `state`
   ADD PRIMARY KEY (`cod_state`);
+
+--
+-- Indices de la tabla `stock`
+--
+ALTER TABLE `stock`
+  ADD PRIMARY KEY (`id_car`);
 
 --
 -- Indices de la tabla `type_motor`
@@ -942,6 +1311,12 @@ ALTER TABLE `extras`
   MODIFY `cod_extra` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
+-- AUTO_INCREMENT de la tabla `facturas`
+--
+ALTER TABLE `facturas`
+  MODIFY `id_fact` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
+
+--
 -- AUTO_INCREMENT de la tabla `image`
 --
 ALTER TABLE `image`
@@ -993,7 +1368,7 @@ ALTER TABLE `type_motor`
 -- AUTO_INCREMENT de la tabla `users`
 --
 ALTER TABLE `users`
-  MODIFY `id_user` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id_user` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
