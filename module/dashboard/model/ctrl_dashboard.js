@@ -690,7 +690,7 @@ function launcherDashboardForStats() {
         .html(
             '<div class="card shadow border-0 w-100">'+
                 '<div class="card-body ">'+
-                '<span class="h6 font-semibold text-muted text-sm d-block mb-2">Marca más buscada</span>'+
+                '<span class="h6 font-semibold text-muted text-sm d-block mb-2">Carroceria más buscada</span>'+
                 '<canvas id="bodyworkVisits-chart" width="100%" height="100%"></canvas>'+
                 '</div>'+
             '</div>'

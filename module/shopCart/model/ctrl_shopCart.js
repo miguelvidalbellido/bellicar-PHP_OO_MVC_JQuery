@@ -23,7 +23,7 @@ const loadCart = () => {
                 $('<div class="row mb-4 d-flex justify-content-between align-items-center"></div>').appendTo('#contentCart')
                 .html(
                       '<div class="col-md-2 col-lg-2 col-xl-2">'+
-                        '<img src="'+data[row].url_image+'" alt="Cotton T-shirt" style="max-width: 130%;">'+
+                        '<img  src="'+data[row].url_image+'" id="rediret-details" data-codcar="'+data[row].cod_car+'" alt="Cotton T-shirt" style="max-width: 130%; cursor:pointer;">'+
                       '</div>'+
                       '<div class="col-md-3 col-lg-3 col-xl-3">'+
                         '<h6 class="text-muted">Shirt</h6>'+
@@ -171,18 +171,42 @@ const controlButtons = () => {
         ajaxPromise("module/shopCart/ctrl/ctrl_shopCart.php?op=checkout", 'POST', 'JSON', { 'username': username })
         .then(function (data) { 
           console.log(data);
-          data == 'CHECKOUT_OK' ? console.log('Pedido realizado exitosamente') : console.log('Se ha producido un error');
+          data == 'CHECKOUT_OK' ? pedidoOK() : console.log('Se ha producido un error');
         });
       
       });
     });
+
+    $(document).on("click", "#rediret-details", function () {
+      let id_car = $(this).data('codcar');
+      localStorage.setItem('codCarPreAddToCart', id_car);
+      window.location.href = "index.php?page=ctrl_shop&op=list";
+    });
     
 }
 
+const pedidoOK = () =>{
+  $('#hero').remove();
+  $('#footer').remove();
+  $('.navbar_search').remove();
+  $('#contentCart').empty();
+  $('#loadDetailsCheckout').empty();
+
+  $('<div class="row mb-4 d-flex justify-content-between align-items-center"></div>').appendTo('#contentCart')
+              .html(
+                '<div class="col text-center">'+
+                  '<img src="view/assets/img/pedidorealizado.png" class="mx-auto d-block img-fluid" alt="Imagen no disponible">'+
+                  '<p class="mt-3">El pedido se ha realizado de forma exitosa</p>'+
+                '</div>'+
+                '<div class="pt-5">'+
+                '<hr class="my-4">'+
+                  '<h6 class="mb-0"><a href="index.php?page=ctrl_shop&op=list" class="text-body"><i class="fas fa-long-arrow-alt-left me-2"></i>Volver a la tienda</a></h6>'+
+                '</div>'
+              );
+}
 
 
 $(document).ready(function() {
     loadCart();
     controlButtons();
-    // incrementProducts();
 });
